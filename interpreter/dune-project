@@ -1,0 +1,4 @@
+(lang dune 2.7)
+(name interpreter)
+
+(using menhir 2.0)
