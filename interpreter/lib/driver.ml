@@ -12,5 +12,5 @@ let eval_file path =
 
 
 let repl _ =
-  let parsed = eval_string "1 :: 2 :: 3  ;  2 < 7  :  3%2" in
+  let parsed = eval_string "\"hel\\\"\\nlo\"" in
   print_endline (Ast.string_of_stmt (List.nth parsed 0))

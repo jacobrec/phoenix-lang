@@ -1,4 +1,5 @@
 %token <int> INT
+%token <string> STR
 %token PLUS MINUS TIMES DIV MOD
 %token LPAREN RPAREN
 
@@ -53,5 +54,6 @@ expression:
 
 literal:
 | e = INT { LitInt e }
+| e = STR { LitString e }
 
 
