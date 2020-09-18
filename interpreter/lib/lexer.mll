@@ -25,11 +25,14 @@ rule token = parse
 | '%'  { MOD }
 | '('  { LPAREN }
 | ')'  { RPAREN }
+| '['  { LBRACK }
+| ']'  { RBRACK }
 | "==" { EQUAL_EQUAL }
 | "<=" { LESS_EQUAL }
 | ">=" { GREATER_EQUAL }
 | '<'  { LESS }
 | '>'  { GREATER }
+| ";;" { SEMI_SEMI }
 | "::" { COLON_COLON }
 | ":=" { COLON_EQUAL }
 | '='  { EQUAL }
