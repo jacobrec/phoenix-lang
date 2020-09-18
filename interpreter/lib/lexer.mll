@@ -16,7 +16,7 @@
 rule token = parse
 | [' ' '\t' '\n'] (* also ignore newlines, not only whitespace and tabs *)
     { token lexbuf }
-| ['0'-'9']+ as i { INT (int_of_string i) }
+| ['0'-'9']+ as i { INT (Int64.of_string i) }
 | '"'  { STR (string (Buffer.create 100) lexbuf) } (* see below *)
 | '+'  { PLUS }
 | '-'  { MINUS }

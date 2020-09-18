@@ -1,5 +1,7 @@
 let eval filebuf =
-  Parser.main Lexer.token filebuf
+  let parsed = Parser.main Lexer.token filebuf in
+  print_endline (String.concat "" (List.map Ast.string_of_stmt parsed));
+  Eval.evaluate parsed
 
 let eval_string str = 
   let filebuf = Lexing.from_string str in
@@ -12,7 +14,7 @@ let eval_file path =
 
 
 let repl _ =
-  let parsed = eval_string "
+  eval_string "
    defn fib n = if n < 2 then n else fib(n-1) + fib(n-2) ;;
    def val = fib(10) : println(\"hi\") ;;
    defn main =
@@ -25,5 +27,4 @@ let repl _ =
      println(\"Ending program\")
    ;;
    println(val)
-" in
-  print_endline (String.concat "" (List.map Ast.string_of_stmt parsed))
+"

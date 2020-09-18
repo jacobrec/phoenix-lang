@@ -1,4 +1,4 @@
-%token <int> INT
+%token <int64> INT
 %token <string> STR
 %token <string> ID
 %token PLUS MINUS TIMES DIV MOD
@@ -61,7 +61,7 @@ expression:
   | name = identifier LPAREN args = commaexprs RPAREN { CallExpr (name, args) }
 // TODO: its auto resolving of shift reduce is how I want it, but I should probably fix it
   | FN args = identifier* EQUAL e = body { FnExpr (args, e) }
-  | DEFN name = identifier args = identifier* EQUAL e = body { DefnExpr (name, args, e) }
+  | DEFN name = identifier args = identifier* EQUAL e = body { DefExpr (name, (FnExpr (args, e))) }
 
 body:
   | e = expression { e }
