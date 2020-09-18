@@ -34,6 +34,14 @@ rule token = parse
 | ":=" { COLON_EQUAL }
 | ':'  { COLON }
 | ';'  { SEMICOLON }
+| "true"  { TRUE }
+| "false" { FALSE }
+| "if"    { IF }
+| "then"  { THEN }
+| "else"  { ELSE }
+| "def"   { DEF }
+| "defn"  { DEFN }
+| "fn"    { FN }
 | eof { EOF }
 | _ { error lexbuf "unexpected character.\n" }
 

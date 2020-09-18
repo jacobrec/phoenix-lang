@@ -4,6 +4,7 @@ type literal =
   | LitIdentifier of identifier
   | LitInt        of int
   | LitString     of string
+  | LitBool       of bool
 
 type uniop =
   | OpNegate
@@ -67,6 +68,7 @@ let string_of_literal lit =
   | LitInt i -> string_of_int i
   | LitString s -> "\"" ^ s ^ "\"" (* TODO: escape string properly *)
   | LitIdentifier s -> string_of_identifier s
+  | LitBool b -> if b then "true" else "false"
 
 let rec string_of_expr expr =
   match expr with

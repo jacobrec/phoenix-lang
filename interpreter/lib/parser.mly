@@ -2,9 +2,13 @@
 %token <string> STR
 %token PLUS MINUS TIMES DIV MOD
 %token LPAREN RPAREN
+%token TRUE FALSE
 
 %token LESS GREATER LESS_EQUAL GREATER_EQUAL EQUAL_EQUAL
 %token COLON_COLON COLON_EQUAL SEMICOLON COLON
+
+%token DEF DEFN FN
+%token IF THEN ELSE
 
 %token EOF
 
@@ -12,6 +16,7 @@
 %left  SEMICOLON COLON
 %right COLON_EQUAL
 %right COLON_COLON
+%right ELSE
 %left EQUAL_EQUAL LESS_EQUAL GREATER_EQUAL
 %left LESS GREATER
 %left PLUS MINUS
@@ -26,7 +31,7 @@
 
 main:
 | stmt = statement EOF { [stmt] }
-| stmt = statement m = main { stmt :: m}
+| stmt = statement m = main { stmt :: m }
 
 statement:
 | stmt = expr_stmt { stmt }
@@ -51,9 +56,12 @@ expression:
 | e1 = expression COLON_EQUAL   e2 = expression { BinExpr (OpAssign, e1, e2) }
 | e1 = expression COLON         e2 = expression { BinExpr (OpColon, e1, e2) }
 | e1 = expression SEMICOLON     e2 = expression { BinExpr (OpSemicolon, e1, e2) }
+| IF e1 = expression THEN e2 = expression ELSE e3 = expression { IfExpr (e1, e2, e3) }
 
 literal:
-| e = INT { LitInt e }
-| e = STR { LitString e }
+| e = INT   { LitInt e }
+| e = STR   { LitString e }
+| TRUE  { LitBool true }
+| FALSE { LitBool false }
 
 
