@@ -1,11 +1,12 @@
 %token <int> INT
 %token <string> STR
+%token <string> ID
 %token PLUS MINUS TIMES DIV MOD
 %token LPAREN RPAREN
 %token TRUE FALSE
 
 %token LESS GREATER LESS_EQUAL GREATER_EQUAL EQUAL_EQUAL
-%token COLON_COLON COLON_EQUAL SEMICOLON COLON
+%token COLON_COLON COLON_EQUAL SEMICOLON COLON EQUAL
 
 %token DEF DEFN FN
 %token IF THEN ELSE
@@ -16,6 +17,7 @@
 %left  SEMICOLON COLON
 %right COLON_EQUAL
 %right COLON_COLON
+%right EQUAL
 %right ELSE
 %left EQUAL_EQUAL LESS_EQUAL GREATER_EQUAL
 %left LESS GREATER
@@ -34,10 +36,8 @@ main:
 | stmt = statement m = main { stmt :: m }
 
 statement:
-| stmt = expr_stmt { stmt }
+| expr = expression { ExprStmt expr } // expr stmt
 
-expr_stmt:
-| expr = expression { ExprStmt expr }
 
 expression:
 | e = literal { LitExpr e }
@@ -57,11 +57,21 @@ expression:
 | e1 = expression COLON         e2 = expression { BinExpr (OpColon, e1, e2) }
 | e1 = expression SEMICOLON     e2 = expression { BinExpr (OpSemicolon, e1, e2) }
 | IF e1 = expression THEN e2 = expression ELSE e3 = expression { IfExpr (e1, e2, e3) }
+| DEF i = identifier EQUAL e = expression { DefExpr (i, e) }
+// TODO: its auto resolving of shift reduce is how I want it, but I should probably fix it
+| FN args = identifier* EQUAL e = body { FnExpr (args, e) }
+| DEFN name = identifier args = identifier* EQUAL e = body { DefnExpr (name, args, e) }
+
+body:
+| e = expression { e }
 
 literal:
 | e = INT   { LitInt e }
 | e = STR   { LitString e }
 | TRUE  { LitBool true }
 | FALSE { LitBool false }
+| i = identifier { LitIdentifier i }
 
 
+identifier:
+| i = ID { i } 

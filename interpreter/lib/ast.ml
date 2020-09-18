@@ -32,10 +32,10 @@ type expr =
   | IfExpr   of expr * expr * expr
   | DefExpr  of identifier * expr
   | FnExpr   of identifier list * expr
+  | DefnExpr of identifier * identifier list * expr
   | LitExpr  of literal
 
 type stmt =
-  | DefnStmt of identifier list * expr
   | ExprStmt of expr
 
 let string_of_uniop op =
@@ -80,9 +80,10 @@ let rec string_of_expr expr =
   | DefExpr (i, e) -> "def " ^ (string_of_identifier i) ^ " = " ^ (string_of_expr e)
   | FnExpr (il, e) -> "fn " ^ (string_of_identifer_list il) ^ " = " ^ (string_of_expr e)
   | LitExpr l -> string_of_literal l
+  | DefnExpr (n, il, e) -> "defn " ^ (string_of_identifier n) ^ " "
+                           ^ (string_of_identifer_list il)
+                           ^ " = " ^ (string_of_expr e) ^ "\n"
 
 let string_of_stmt stmt =
   match stmt with
-  | DefnStmt (il, e) -> "defn " ^ (string_of_identifer_list il)
-                        ^ " = " ^ (string_of_expr e) ^ "\n"
   | ExprStmt e ->  (string_of_expr e) ^ "\n"

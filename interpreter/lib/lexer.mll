@@ -32,6 +32,7 @@ rule token = parse
 | '>'  { GREATER }
 | "::" { COLON_COLON }
 | ":=" { COLON_EQUAL }
+| '='  { EQUAL }
 | ':'  { COLON }
 | ';'  { SEMICOLON }
 | "true"  { TRUE }
@@ -42,6 +43,7 @@ rule token = parse
 | "def"   { DEF }
 | "defn"  { DEFN }
 | "fn"    { FN }
+| ['a'-'z']+ as i { ID i }
 | eof { EOF }
 | _ { error lexbuf "unexpected character.\n" }
 
