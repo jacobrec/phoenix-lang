@@ -12,5 +12,7 @@ let eval_file path =
 
 
 let repl _ =
-  let parsed = eval_string "fn a b = a : b" in
+  let parsed = eval_string "
+                            x(1, 2, 3)
+" in
   print_endline (Ast.string_of_stmt (List.nth parsed 0))

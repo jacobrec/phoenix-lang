@@ -53,8 +53,7 @@
 
 ** Example Code
    #+BEGIN_SRC
-   defn fib n = if (n < 2) n else fib(n-1) + fib(n-2)
-   defn fib n = if n < 2 then n else fib(n-1) + fib(n-2) end
+   defn fib n = if n < 2 then n else fib(n-1) + fib(n-2)
    def val = fib(10) also println("hi")
    defn main =
      println("Starting program");

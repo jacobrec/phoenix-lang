@@ -6,7 +6,7 @@
 %token TRUE FALSE
 
 %token LESS GREATER LESS_EQUAL GREATER_EQUAL EQUAL_EQUAL
-%token COLON_COLON COLON_EQUAL SEMICOLON COLON EQUAL
+%token COLON_COLON COLON_EQUAL SEMICOLON COLON EQUAL COMMA
 
 %token DEF DEFN FN
 %token IF THEN ELSE
@@ -33,7 +33,7 @@
 
 main:
 | stmt = statement EOF { [stmt] }
-| stmt = statement m = main { stmt :: m }
+//| stmt = statement m = main { stmt :: m }
 
 statement:
 | expr = expression { ExprStmt expr } // expr stmt
@@ -58,12 +58,21 @@ expression:
 | e1 = expression SEMICOLON     e2 = expression { BinExpr (OpSemicolon, e1, e2) }
 | IF e1 = expression THEN e2 = expression ELSE e3 = expression { IfExpr (e1, e2, e3) }
 | DEF i = identifier EQUAL e = expression { DefExpr (i, e) }
+| name = identifier LPAREN args = commaexprs RPAREN { CallExpr (name, args) }
 // TODO: its auto resolving of shift reduce is how I want it, but I should probably fix it
 | FN args = identifier* EQUAL e = body { FnExpr (args, e) }
 | DEFN name = identifier args = identifier* EQUAL e = body { DefnExpr (name, args, e) }
 
 body:
 | e = expression { e }
+
+commaexprs:
+| e = expression el = commaexprs2 { e :: el }
+| e = expression { [e] }
+| { [] }
+commaexprs2:
+| COMMA e = expression el = commaexprs2 { e :: el }
+| { [] }
 
 literal:
 | e = INT   { LitInt e }

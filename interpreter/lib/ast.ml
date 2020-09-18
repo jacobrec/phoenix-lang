@@ -33,6 +33,7 @@ type expr =
   | DefExpr  of identifier * expr
   | FnExpr   of identifier list * expr
   | DefnExpr of identifier * identifier list * expr
+  | CallExpr of identifier * expr list
   | LitExpr  of literal
 
 type stmt =
@@ -80,9 +81,12 @@ let rec string_of_expr expr =
   | DefExpr (i, e) -> "def " ^ (string_of_identifier i) ^ " = " ^ (string_of_expr e)
   | FnExpr (il, e) -> "fn " ^ (string_of_identifer_list il) ^ " = " ^ (string_of_expr e)
   | LitExpr l -> string_of_literal l
+  | CallExpr (n, el) -> (string_of_identifier n) ^ "(" ^
+                           (string_of_expression_list el) ^ ")"
   | DefnExpr (n, il, e) -> "defn " ^ (string_of_identifier n) ^ " "
                            ^ (string_of_identifer_list il)
                            ^ " = " ^ (string_of_expr e) ^ "\n"
+  and string_of_expression_list il = (String.concat ", " (List.map string_of_expr il))
 
 let string_of_stmt stmt =
   match stmt with
