@@ -68,7 +68,6 @@ body:
 
 commaexprs:
 | e = expression el = commaexprs2 { e :: el }
-| e = expression { [e] }
 | { [] }
 commaexprs2:
 | COMMA e = expression el = commaexprs2 { e :: el }
