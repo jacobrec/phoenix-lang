@@ -3,6 +3,18 @@ open Types
 
 exception EvalErr of string
 
+let get_free_vars bound expression =
+  let bound = ref bound in
+  let free = ref [] in
+  let lit = function
+    | LitIdentifier i -> if List.mem i !bound then ()
+                         else free := i :: !free;
+                         LitExpr (LitIdentifier i)
+    | i -> LitExpr i in
+  let def name expr = bound := name :: !bound; DefExpr (name, expr) in
+  ignore (walk ~lit ~def ~walk_fn:false expression);
+  !free
+
 let rec call env fn args =
   let (argnames, expr) = fn in
   let nenv = Enviroment.push env in
@@ -51,8 +63,12 @@ and eval_if env e1 e2 e3 =
   else
     eval env e3
 
-and eval_fn _env args e =
-  Func (args, e)
+and eval_fn env args e =
+  let eval_ident i = Enviroment.get env i in
+  let free_vars = get_free_vars args e in
+  let free_vals = (List.map eval_ident free_vars) in
+  let fn = (args, e) in
+  Closure (fn, free_vars, free_vals)
 
 and eval_def env name e =
   let v = eval env e in
@@ -62,6 +78,10 @@ and eval_def env name e =
 and eval_call env name args =
   let fn = Enviroment.get env name in
   match fn with
+  | Closure (fn, free, vals) ->
+     let (fargs, fn_expr) = fn in
+     let evaled = (List.map (fun x -> eval env x) args) in
+     call env ((List.append fargs free), fn_expr) (List.append evaled vals)
   | Func fn ->
      let evals = eval env in
      call env fn (List.map evals args)

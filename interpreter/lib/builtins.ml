@@ -89,17 +89,8 @@ let greater_equal v1 v2 =
 let print values =
   assert ((List.length values) = 1);
   let v = List.hd values in
-  let str =
-    match v with
-    | Int48 v -> Int64.to_string v
-    | Float v -> Float.to_string v
-    | Bool v -> if v then "true" else "false"
-    | Char v -> String.make 1 v
-    | String v -> v
-    | Func _v -> "[function]"
-    | Closure (_, _) -> "[closure]"
-    | BuiltinFunc _ -> "[builtin function]"
-  in print_string str;
+  let str = string_of_ptype v in
+  print_string str;
   String str
 
 let println values =

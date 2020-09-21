@@ -15,6 +15,9 @@ let eval_file path =
 
 let repl _ =
   eval_string "
-               defn fib n = if n < 2 then n else fib(n-1) + fib(n-2);;
-               fib(10)
+               def a = 5;;
+               defn scopetest b c = a;;
+               scopetest(0, 0);;
+               def a = 7;;
+               scopetest(0, 0)
 "

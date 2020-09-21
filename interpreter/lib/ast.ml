@@ -88,3 +88,29 @@ let rec string_of_expr expr =
 let string_of_stmt stmt =
   match stmt with
   | ExprStmt e ->  (string_of_expr e) ^ ";;\n"
+
+let rec walk
+          ?(uni=fun op e -> UniExpr (op, e))
+          ?(bin=fun op e1 e2 -> BinExpr (op, e1, e2))
+          ?(eif=fun e1 e2 e3 -> IfExpr (e1, e2, e3))
+          ?(def=fun n e -> DefExpr (n, e))
+          ?(fn=fun a b -> FnExpr (a, b))
+          ?(call=fun a b -> CallExpr (a, b))
+          ?(lit=fun l -> LitExpr l)
+          ?(walk_uni=true)
+          ?(walk_bin=true)
+          ?(walk_if=true)
+          ?(walk_def=true)
+          ?(walk_fn=true)
+          ?(walk_call=true)
+          exp =
+  let mwalk = walk ~uni ~bin ~eif ~def ~fn ~call ~lit
+                   ~walk_uni ~walk_bin ~walk_if ~walk_def ~walk_fn ~walk_call in
+  match exp with
+  | UniExpr (op, e) -> if walk_uni then uni op (mwalk e) else uni op e
+  | BinExpr (op, e1, e2) -> if walk_bin then bin op (mwalk e1) (mwalk e2) else bin op e1 e2
+  | IfExpr  (e1, e2, e3) -> if walk_if then eif (mwalk e1) (mwalk e2) (mwalk e3) else eif e1 e2 e3
+  | DefExpr (n, e) -> if walk_def then def n (mwalk e) else def n e
+  | FnExpr  (args, e) -> if walk_fn then fn args (mwalk e) else fn args e
+  | CallExpr(name, args) -> if walk_call then call name (List.map mwalk args) else call name args
+  | LitExpr l -> lit l
