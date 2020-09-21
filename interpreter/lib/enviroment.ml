@@ -9,16 +9,13 @@ let create _ =
 let push env =
   Hashtbl.create 100 :: env
 
-let pop env =
-  match env with
-  | _ :: t -> t
-  | [] -> raise (EnvPop "Cannot pop base enviroment")
-
 let add env key value =
+  assert (0 < List.length env);
   let tbl = List.hd env in
   Hashtbl.add tbl key value
 
 let rec find env key =
+  assert (0 < List.length env);
   let tbl = List.hd env in
   let next = List.tl env in
   if Hashtbl.mem tbl key then
@@ -26,19 +23,21 @@ let rec find env key =
   else
     match next with
     | [] -> None
-    | _ :: n_env -> find n_env key
+    | _ :: _ -> find next key
   
 let lookup_raise key = 
   raise (EnvLookup ("Key[" ^ (Ast.string_of_identifier key) ^
                       "] not found in current env"))
 
 let set env key value =
+  assert (0 < List.length env);
   let maybetbl = find env key in
   match maybetbl with
   | None -> lookup_raise key
   | Some tbl -> Hashtbl.replace tbl key value
 
 let get env key =
+  assert (0 < List.length env);
   let maybetbl = find env key in
   match maybetbl with
   | None -> lookup_raise key

@@ -1,4 +1,6 @@
 (executable
  (public_name interpreter)
  (name main)
+ (modes native byte)
+ (flags (:standard -g))
  (libraries interpreter))

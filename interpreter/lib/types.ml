@@ -8,6 +8,7 @@ type ptype =
   | Char of char
   | Float of float (* 64bit floats *)
   | Func of pfunc
+  | BuiltinFunc of (ptype list -> ptype)
   | Closure of pfunc * ptype list (* first ptype must be a Func *)
 
 let is_int = function
@@ -45,6 +46,7 @@ let is_truthy = function
   | Char v -> 0 <> Char.code v
   | Float v -> 0.0 <> v
   | Func (_args, _e) -> true
+  | BuiltinFunc _ -> true
   | Closure (_fn, _vals) -> true
 
 let string_of_ptype = function
@@ -54,4 +56,5 @@ let string_of_ptype = function
   | Char v -> String.make 1 v
   | Float v -> Float.to_string v
   | Func (args, e) -> "[fn " ^ (String.concat " " args) ^ " = " ^ Ast.string_of_expr e ^ "]"
+  | BuiltinFunc _ -> "[builtin fn]"
   | Closure (_fn, _vals) -> "Closure"

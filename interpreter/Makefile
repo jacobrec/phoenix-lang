@@ -1,11 +1,23 @@
-run: _build/bin/main.exe
-	dune exec bin/main.exe
+BIN=_build/default
+NATIVE_TARGET=bin/main.exe
+BYTE_TARGET=bin/main.bc
 
-conflicts: _build/bin/main.exe
+
+
+run: $(BIN)/$(BYTE_TARGET)
+	dune exec $(BYTE_TARGET)
+
+run_native: $(BIN)/$(NATIVE_TARGET)
+	dune exec $(NATIVE_TARGET)
+
+conflicts: $(BIN)/$(BYTE_TARGET)
 	-menhir --explain _build/default/lib/parser.mly
 	cat _build/default/lib/parser.conflicts
 
-_build/bin/main.exe:
-	dune build bin/main.exe
+$(BIN)/$(NATIVE_TARGET):
+	dune build $(NATIVE_TARGET)
+
+$(BIN)/$(BYTE_TARGET):
+	dune build -g $(BYTE_TARGET)
 
 

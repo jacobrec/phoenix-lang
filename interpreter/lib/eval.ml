@@ -5,11 +5,11 @@ exception EvalErr of string
 
 let rec call env fn args =
   let (argnames, expr) = fn in
-  let env = Enviroment.push env in
-  let add_env name item = Enviroment.add env name item in
+  let nenv = Enviroment.push env in
+  let add_env name item =
+    Enviroment.add nenv name item in
   ignore (List.map2 add_env argnames args);
-  eval env expr
-
+  eval nenv expr
 
 and eval_uniop env op e =
   let v = eval env e in
@@ -21,20 +21,20 @@ and  eval_binop env op e1 e2 =
   let v1 = eval env e1 in
   let v2 = eval env e2 in
   match op with
-  | OpPlus -> Builtins.add v1 v1
+  | OpPlus -> Builtins.add v1 v2
   | OpMinus -> Builtins.subtract v1 v2
   | OpTimes -> Builtins.times v1 v2
   | OpDiv -> Builtins.divide v1 v2
-  | OpMod -> v1
-  | OpLess -> v1
-  | OpGreater -> v1
-  | OpEqualEqual -> v1
-  | OpGreaterEqual -> v1
-  | OpLessEqual -> v1
-  | OpCons -> v1
-  | OpAssign -> v1
+  | OpMod -> Builtins.modulo v1 v2
+  | OpLess -> Builtins.less v1 v2
+  | OpGreater -> Builtins.greater v1 v2
+  | OpEqualEqual -> raise (EvalErr "Equality is not yet supported")
+  | OpGreaterEqual -> Builtins.greater_equal v1 v2
+  | OpLessEqual -> Builtins.less_equal v1 v2
+  | OpCons -> raise (EvalErr "Cons is not yet supported")
   | OpSemicolon -> v2
   | OpColon -> v1
+  | OpAssign -> raise (EvalErr "Assignment is not yet supported")
 
 and eval_lit env = function
   | LitBool v -> Bool v
@@ -65,6 +65,9 @@ and eval_call env name args =
   | Func fn ->
      let evals = eval env in
      call env fn (List.map evals args)
+  | BuiltinFunc fn ->
+     let evals = eval env in
+     fn (List.map evals args)
   | _ -> raise (EvalErr "cannot call non callable object")
 
 and eval env = function
@@ -84,8 +87,14 @@ let eval_stmt env stmt =
      print_string "Got value: ";
      print_endline (string_of_ptype p)
 
-let evaluate ast = 
+let env_with_builtins _ =
   let env = Enviroment.create () in
+  Enviroment.add env "println" (Types.BuiltinFunc Builtins.println);
+  Enviroment.add env "print" (Types.BuiltinFunc Builtins.print);
+  env
+  
+let evaluate ast = 
+  let env = env_with_builtins () in
   let e = eval_stmt env in
   ignore (List.map e ast)
 
