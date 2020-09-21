@@ -1,13 +1,14 @@
 open Ast
 
+type pfunc = identifier list * expr
 type ptype =
   | Int48 of int64
   | Bool of bool
   | String of string
   | Char of char
   | Float of float (* 64bit floats *)
-  | Func of identifier list * expr
-  | Closure of ptype * ptype list (* first ptype must be a Func *)
+  | Func of pfunc
+  | Closure of pfunc * ptype list (* first ptype must be a Func *)
 
 let is_int = function
   | Int48 _ -> true
@@ -52,5 +53,5 @@ let string_of_ptype = function
   | String v -> v
   | Char v -> String.make 1 v
   | Float v -> Float.to_string v
-  | Func (_args, _e) -> "Func"
+  | Func (args, e) -> "[fn " ^ (String.concat " " args) ^ " = " ^ Ast.string_of_expr e ^ "]"
   | Closure (_fn, _vals) -> "Closure"
