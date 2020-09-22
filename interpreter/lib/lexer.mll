@@ -23,6 +23,7 @@ rule token = parse
 | '*'  { TIMES }
 | '/'  { DIV }
 | '%'  { MOD }
+| '!'  { BANG }
 | '('  { LPAREN }
 | ')'  { RPAREN }
 | '['  { LBRACK }

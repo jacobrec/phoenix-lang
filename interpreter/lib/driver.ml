@@ -14,17 +14,18 @@ let eval_file path =
 
 
 let repl _ =
-  eval_string "
-   defn fib n = if n < 2 then n else fib(n-1) + fib(n-2) ;;
-   def val = fib(10) : println(\"hi\") ;;
-   defn main =
-     println(\"Starting program\");
-     def offset = 1;
-     foreach(
-       [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-       fn i = println(fib(offset + i))
-     );
-     println(\"Ending program\")
-   ;;
-   println(val)
+  eval_string
+"
+defn length l =
+  if l then 1 + length(cdr(l)) else 0
+;;
+ 
+defn map f l = 
+  if l then (f(car(l)) :: map(f, cdr(l))) else l
+;;
+
+def a = [|1, 2, 3|];;
+defn test x = 
+  x + 1;;
+map(test, a)
 "

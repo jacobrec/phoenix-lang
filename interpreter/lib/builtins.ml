@@ -91,6 +91,18 @@ let cons v1 v2 =
   | List l -> List (v1 :: l)
   | _ -> raise (TypeErr "Cannot cons to a non list")
 
+let car v1 =
+  match v1 with
+  | List (h :: _) -> h
+  | List _ -> raise (TypeErr "Cannot take car of empty list")
+  | _ -> raise (TypeErr "Cannot take car of non list")
+
+let cdr v1 =
+  match v1 with
+  | List (_ :: t) -> List t
+  | List _ -> raise (TypeErr "Cannot take cdr of empty list")
+  | _ -> raise (TypeErr "Cannot take cdr of non list")
+
 let print values =
   assert ((List.length values) = 1);
   let v = List.hd values in
@@ -103,3 +115,9 @@ let println values =
   print_newline ();
   v
   
+let wrap1 fn = 
+  let res_fn values = 
+    assert ((List.length values) = 1);
+    let v = List.hd values in
+    fn v
+  in res_fn

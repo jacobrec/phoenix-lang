@@ -17,6 +17,7 @@ let get_free_vars bound expression =
 
 let rec call env fn args =
   let (argnames, expr) = fn in
+  if ((List.length argnames) == (List.length args)) then failwith "Invalid number of arguments" else ();
   let nenv = Enviroment.push env in
   let add_env name item =
     Enviroment.add nenv name item in
@@ -27,7 +28,7 @@ and eval_uniop env op e =
   let v = eval env e in
   match op with
   | OpNegate -> v
-  | OpNot -> v
+  | OpNot -> Bool (if is_truthy v then false else true)
 
 and  eval_binop env op e1 e2 =
   let v1 = eval env e1 in
@@ -114,6 +115,8 @@ let env_with_builtins _ =
   let env = Enviroment.create () in
   Enviroment.add env "println" (Types.BuiltinFunc Builtins.println);
   Enviroment.add env "print" (Types.BuiltinFunc Builtins.print);
+  Enviroment.add env "car" (Types.BuiltinFunc (Builtins.wrap1 Builtins.car));
+  Enviroment.add env "cdr" (Types.BuiltinFunc (Builtins.wrap1 Builtins.cdr));
   env
   
 let evaluate ast = 

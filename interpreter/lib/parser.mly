@@ -11,6 +11,8 @@
 %token DEF DEFN FN
 %token IF THEN ELSE
 
+%token BANG
+
 %token EOF
 
 /* Low Precedence */
@@ -23,6 +25,7 @@
 %left LESS GREATER
 %left PLUS MINUS
 %left TIMES DIV MOD
+%left BANG
 /* High Precedence */
 
 %start <stmt list> main
@@ -42,6 +45,9 @@ statement:
 expression:
   | e = literal { LitExpr e }
   | LPAREN e = expression RPAREN  { e }
+
+  | BANG e = expression { UniExpr (OpNot, e) }
+
   | e1 = expression TIMES         e2 = expression { BinExpr (OpTimes, e1, e2) }
   | e1 = expression DIV           e2 = expression { BinExpr (OpDiv, e1, e2) }
   | e1 = expression MOD           e2 = expression { BinExpr (OpMod, e1, e2) }
