@@ -24,8 +24,12 @@ defn map f l =
   if l then (f(car(l)) :: map(f, cdr(l))) else l
 ;;
 
+defn foreach f l = 
+  if l then (f(car(l)); foreach(f, cdr(l)); [||]) else l
+;;
+
 def a = [|1, 2, 3|];;
 defn test x = 
   x + 1;;
-map(test, a)
+foreach(println, a);;
 "

@@ -17,7 +17,7 @@ let get_free_vars bound expression =
 
 let rec call env fn args =
   let (argnames, expr) = fn in
-  if ((List.length argnames) == (List.length args)) then failwith "Invalid number of arguments" else ();
+  if ((List.length argnames) <> (List.length args)) then failwith "Invalid number of arguments" else ();
   let nenv = Enviroment.push env in
   let add_env name item =
     Enviroment.add nenv name item in

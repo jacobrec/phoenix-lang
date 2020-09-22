@@ -35,8 +35,11 @@
 
 
 main:
-  | stmt = statement EOF { [stmt] }
-  | stmt = statement SEMI_SEMI m = main { stmt :: m }
+  | stmt = stmt EOF { [stmt] }
+  | stmt = stmt m = main { stmt :: m }
+
+stmt:
+  | stmt = statement SEMI_SEMI { stmt }
 
 statement:
   | expr = expression { ExprStmt expr } // expr stmt
