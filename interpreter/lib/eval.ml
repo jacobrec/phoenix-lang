@@ -113,16 +113,26 @@ let eval_stmt ?(loud=false) env stmt =
        print_endline (string_of_ptype p);
      end else ()
 
-let env_with_builtins _ =
+let rec env_with_builtins _ =
   let env = Enviroment.create () in
   Enviroment.add env "println" (Types.BuiltinFunc Builtins.println);
   Enviroment.add env "print" (Types.BuiltinFunc Builtins.print);
   Enviroment.add env "car" (Types.BuiltinFunc (Builtins.wrap1 Builtins.car));
   Enviroment.add env "cdr" (Types.BuiltinFunc (Builtins.wrap1 Builtins.cdr));
+  Enviroment.add env "load" (Types.BuiltinFunc (Builtins.wrap1 load));
   env
   
-let evaluate ?(loud=false) ast = 
+and evaluate ?(loud=false) ast = 
   let env = env_with_builtins () in
   let e = eval_stmt ~loud env in
   ignore (List.map e ast)
 
+and load v =
+  match v with
+  | String loc ->
+    let ch = open_in loc in
+    let filebuf = Lexing.from_channel ch in
+    let parsed = Parse_runner.parse filebuf in
+    evaluate parsed;
+    Bool true
+  | _ -> Bool false
