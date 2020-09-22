@@ -1,11 +1,14 @@
-let eval filebuf =
+let eval ?(loud=false) filebuf =
   let parsed = Parser.main Lexer.token filebuf in
+  if loud then begin
+  print_string "// Parsed to: ";
   print_endline (String.concat "" (List.map Ast.string_of_stmt parsed));
-  Eval.evaluate parsed
+  end else ();
+  Eval.evaluate ~loud parsed
 
-let eval_string str = 
+let eval_string ?(loud=false) str = 
   let filebuf = Lexing.from_string str in
-  eval filebuf
+  eval ~loud filebuf
 
 let eval_file path = 
   let ch = open_in path in
@@ -13,9 +16,12 @@ let eval_file path =
   eval filebuf
 
 
-let repl _ =
-  eval_string
-"
+let rec repl _ =
+  print_string "> ";
+  flush stdout;
+  eval_string ~loud:true (input_line stdin);
+  repl ()
+(*
 defn length l =
   if l then 1 + length(cdr(l)) else 0
 ;;
@@ -32,4 +38,4 @@ def a = [|1, 2, 3|];;
 defn test x = 
   x + 1;;
 foreach(println, a);;
-"
+*)

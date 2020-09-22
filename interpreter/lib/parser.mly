@@ -17,9 +17,9 @@
 
 /* Low Precedence */
 %left  SEMICOLON COLON
+%right EQUAL
 %right COLON_EQUAL
 %right COLON_COLON
-%right EQUAL
 %right ELSE
 %left EQUAL_EQUAL LESS_EQUAL GREATER_EQUAL
 %left LESS GREATER

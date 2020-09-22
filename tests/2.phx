@@ -1,0 +1,3 @@
+def a = [|1, 4, 3|];;
+def b = car(a) :: (2 :: cdr(cdr(a)));
+println(b);;

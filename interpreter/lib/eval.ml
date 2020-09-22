@@ -104,12 +104,14 @@ and eval env = function
   | CallExpr (name, args) -> eval_call env name args
 
 
-let eval_stmt env stmt = 
+let eval_stmt ?(loud=false) env stmt = 
   match stmt with
   | ExprStmt e ->
      let p = eval env e in
-     print_string "Got value: ";
-     print_endline (string_of_ptype p)
+     if loud then begin
+       print_string "=> ";
+       print_endline (string_of_ptype p);
+     end else ()
 
 let env_with_builtins _ =
   let env = Enviroment.create () in
@@ -119,8 +121,8 @@ let env_with_builtins _ =
   Enviroment.add env "cdr" (Types.BuiltinFunc (Builtins.wrap1 Builtins.cdr));
   env
   
-let evaluate ast = 
+let evaluate ?(loud=false) ast = 
   let env = env_with_builtins () in
-  let e = eval_stmt env in
+  let e = eval_stmt ~loud env in
   ignore (List.map e ast)
 
