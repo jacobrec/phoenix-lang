@@ -11,6 +11,8 @@
       Printf.kprintf (fun msg -> 
           raise (Error ((position lexbuf)^" "^msg))) fmt
 
+  let errors lexbuf str = 
+          raise (Error ((position lexbuf)^" "^str))
 
 }
 
@@ -30,8 +32,10 @@ rule token = parse
 | ')'  { RPAREN }
 | '['  { LBRACK }
 | ']'  { RBRACK }
-| "[|"  { LBRACK_PIPE }
-| "|]"  { RBRACK_PIPE }
+| "[|" { LBRACK_PIPE }
+| "|]" { RBRACK_PIPE }
+| "{"  { LBRACE }
+| "}"  { RBRACE }
 | "==" { EQUAL_EQUAL }
 | "<=" { LESS_EQUAL }
 | ">=" { GREATER_EQUAL }
@@ -52,9 +56,9 @@ rule token = parse
 | "def"   { DEF }
 | "defn"  { DEFN }
 | "fn"    { FN }
-| ['a'-'z' 'A'-'Z' '@' '$']['a'-'z' 'A'-'Z' '0'-'9' '@' '-' '_' '+' '=' '?' '/' ':' '$']+ as i { ID i }
+| ['a'-'z' 'A'-'Z' '@' '$']['a'-'z' 'A'-'Z' '0'-'9' '@' '_' '?' '$']* as i { ID i }
 | eof { EOF }
-| _ { error lexbuf "unexpected character.\n" }
+| _ { errors lexbuf ("unexpected character: [" ^ (Lexing.lexeme lexbuf) ^ "]") }
 
 and string buf = parse (* use buf to build up result *)
 | [^'"' '\n' '\\']+  
