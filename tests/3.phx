@@ -1,1 +1,6 @@
-load("./1.phx");;
+def a = 5;;
+defn scopetest = println(a);;
+scopetest();;
+def a = 7;;
+scopetest();;
+

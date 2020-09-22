@@ -1,1 +1,15 @@
-load("./lists.phx")
+###### Core Library
+# This is compiled in with every code
+
+#### List functions
+defn length l =
+  if l then 1 + length(cdr(l)) else 0
+;;
+
+defn map f l =
+  if l then (f(car(l)) :: map(f, cdr(l))) else l
+;;
+
+defn foreach f l =
+  if l then (f(car(l)); foreach(f, cdr(l)); [||]) else l
+;;
