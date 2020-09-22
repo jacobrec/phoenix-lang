@@ -11,6 +11,7 @@
       Printf.kprintf (fun msg -> 
           raise (Error ((position lexbuf)^" "^msg))) fmt
 
+
 }
 
 rule token = parse
@@ -18,6 +19,7 @@ rule token = parse
     { token lexbuf }
 | ['0'-'9']+ as i { INT (Int64.of_string i) }
 | '"'  { STR (string (Buffer.create 100) lexbuf) } (* see below *)
+| '#'  { waste_comment lexbuf } (* Comment, read til EOL *)
 | '+'  { PLUS }
 | '-'  { MINUS }
 | '*'  { TIMES }
@@ -50,7 +52,7 @@ rule token = parse
 | "def"   { DEF }
 | "defn"  { DEFN }
 | "fn"    { FN }
-| ['a'-'z']+ as i { ID i }
+| ['a'-'z' 'A'-'Z' '@' '$']['a'-'z' 'A'-'Z' '0'-'9' '@' '-' '_' '+' '=' '?' '/' ':' '$']+ as i { ID i }
 | eof { EOF }
 | _ { error lexbuf "unexpected character.\n" }
 
@@ -62,11 +64,14 @@ and string buf = parse (* use buf to build up result *)
               Lexing.new_line lexbuf;
               string buf lexbuf }
 | '\\' '"'  { Buffer.add_char buf '"'; string buf lexbuf }
-| '\\' 'n' { Buffer.add_char buf '\n'; string buf lexbuf }
-| '\\' 't' { Buffer.add_char buf '\t'; string buf lexbuf }
+| '\\' 'n'  { Buffer.add_char buf '\n'; string buf lexbuf }
+| '\\' 't'  { Buffer.add_char buf '\t'; string buf lexbuf }
 | '\\'      { Buffer.add_char buf '\\'; string buf lexbuf }
 
 | '"'       { Buffer.contents buf } (* return *)
 | eof       { error lexbuf "end of input inside of a string" }
 | _         { error lexbuf 
                 "found '%s' - don't know how to handle" @@ Lexing.lexeme lexbuf }
+and waste_comment = parse (* use buf to build up result *)
+| '\n'      { token lexbuf }
+| _         { waste_comment lexbuf }
