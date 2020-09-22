@@ -43,7 +43,7 @@ and  eval_binop env op e1 e2 =
   | OpEqualEqual -> raise (EvalErr "Equality is not yet supported")
   | OpGreaterEqual -> Builtins.greater_equal v1 v2
   | OpLessEqual -> Builtins.less_equal v1 v2
-  | OpCons -> raise (EvalErr "Cons is not yet supported")
+  | OpCons -> Builtins.cons v1 v2
   | OpSemicolon -> v2
   | OpColon -> v1
   | OpAssign -> raise (EvalErr "Assignment is not yet supported")
@@ -53,7 +53,10 @@ and eval_lit env = function
   | LitIdentifier v -> Enviroment.get env v
   | LitInt v -> Int48 v
   | LitString v -> String v
-  | LitArray _v -> Int48 0L (* TODO: add arrays *)
+  | LitList v ->
+     List (List.map (fun i -> eval env i) v)
+  | LitArray v ->
+     Array (Array.of_list (List.map (fun i -> eval env i) v))
   
 
 and eval_if env e1 e2 e3 =

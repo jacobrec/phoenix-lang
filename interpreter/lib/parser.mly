@@ -2,7 +2,7 @@
 %token <string> STR
 %token <string> ID
 %token PLUS MINUS TIMES DIV MOD
-%token LPAREN RPAREN LBRACK RBRACK
+%token LPAREN RPAREN LBRACK RBRACK LBRACK_PIPE RBRACK_PIPE
 %token TRUE FALSE
 
 %token LESS GREATER LESS_EQUAL GREATER_EQUAL EQUAL_EQUAL EQUAL 
@@ -79,7 +79,8 @@ literal:
   | TRUE  { LitBool true }
   | FALSE { LitBool false }
   | i = identifier { LitIdentifier i }
-  | LBRACK items = commaexprs RBRACK { LitArray items }
+  | LBRACK      items = commaexprs RBRACK      { LitArray items }
+  | LBRACK_PIPE items = commaexprs RBRACK_PIPE { LitList items }
 
 
 identifier:

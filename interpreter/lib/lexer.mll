@@ -27,6 +27,8 @@ rule token = parse
 | ')'  { RPAREN }
 | '['  { LBRACK }
 | ']'  { RBRACK }
+| "[|"  { LBRACK_PIPE }
+| "|]"  { RBRACK_PIPE }
 | "==" { EQUAL_EQUAL }
 | "<=" { LESS_EQUAL }
 | ">=" { GREATER_EQUAL }

@@ -86,6 +86,11 @@ let greater_equal v1 v2 =
   | (Float v1, Float v2) -> Bool (fcmp v1 v2)
   | (_, _) -> raise (TypeErr "Cannot check greater or equal of these types")
 
+let cons v1 v2 =
+  match v2 with
+  | List l -> List (v1 :: l)
+  | _ -> raise (TypeErr "Cannot cons to a non list")
+
 let print values =
   assert ((List.length values) = 1);
   let v = List.hd values in

@@ -8,6 +8,8 @@ type ptype =
   | Char of char
   | Float of float (* 64bit floats *)
   | Func of pfunc
+  | List of ptype list
+  | Array of ptype Array.t
   | BuiltinFunc of (ptype list -> ptype)
   | Closure of pfunc * identifier list * ptype list
 
@@ -47,9 +49,11 @@ let is_truthy = function
   | Float v -> 0.0 <> v
   | Func (_args, _e) -> true
   | BuiltinFunc _ -> true
+  | Array l -> 0 <> Array.length l
+  | List l -> 0 <> List.length l
   | Closure (_fn, _free, _vals) -> true
 
-let string_of_ptype = function
+let rec string_of_ptype = function
   | Int48 v -> Int64.to_string v
   | Bool v -> if v then "true" else "false"
   | String v -> v
@@ -57,4 +61,6 @@ let string_of_ptype = function
   | Float v -> Float.to_string v
   | Func (args, e) -> "[fn " ^ (String.concat " " args) ^ " = " ^ Ast.string_of_expr e ^ "]"
   | BuiltinFunc _ -> "[builtin fn]"
+  | Array v -> "[" ^ (String.concat ", " (List.map string_of_ptype (Array.to_list v))) ^ "]"
+  | List v -> "[|" ^ (String.concat ", " (List.map string_of_ptype v)) ^ "|]"
   | Closure (_fn, _free, _vals) -> "[closure]"
