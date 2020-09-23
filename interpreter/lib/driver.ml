@@ -1,6 +1,5 @@
-
-let parse_and_eval ?(loud=false) filebuf =
-  let parsed = Parse_runner.parse ~loud filebuf in
+let parse_and_eval ?(loud=false) ?(filename="repl") filebuf =
+  let parsed = Parse_runner.parse ~loud ~filename filebuf in
   Eval.evaluate ~loud parsed
 
 let parse_and_eval_string ?(loud=false) str = 
@@ -10,7 +9,7 @@ let parse_and_eval_string ?(loud=false) str =
 let parse_and_eval_file path = 
   let ch = open_in path in
   let filebuf = Lexing.from_channel ch in
-  parse_and_eval filebuf
+  parse_and_eval filebuf ~filename:path
 
 let load_lib _ =
   parse_and_eval_file "/home/jacob/phoenix-lang/lib/core.phx"

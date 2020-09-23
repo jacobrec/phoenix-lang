@@ -1,24 +1,27 @@
 {
   open Parser
-  exception Error of string
+  open Lexing
+  exception SyntaxError of string
 
-  let position lexbuf =
-    let p = lexbuf.Lexing.lex_curr_p in
-        Printf.sprintf "%s:%d:%d" 
-        p.Lexing.pos_fname p.Lexing.pos_lnum (p.Lexing.pos_cnum - p.Lexing.pos_bol)
-        
-  let error lexbuf fmt = 
-      Printf.kprintf (fun msg -> 
-          raise (Error ((position lexbuf)^" "^msg))) fmt
 
-  let errors lexbuf str = 
-          raise (Error ((position lexbuf)^" "^str))
+
+  let next_line lexbuf =
+    let pos = lexbuf.lex_curr_p in
+    lexbuf.lex_curr_p <-
+      { pos with pos_bol = lexbuf.lex_curr_pos;
+                 pos_lnum = pos.pos_lnum + 1
+      }
+
 
 }
 
+let white = [' ' '\t']+
+let newline = '\r' | '\n' | "\r\n"
+let id = ['a'-'z' 'A'-'Z' '@' '$' '?' '_']['a'-'z' 'A'-'Z' '0'-'9' '@' '_' '?' '$']*
+
 rule token = parse
-| [' ' '\t' '\n'] (* also ignore newlines, not only whitespace and tabs *)
-    { token lexbuf }
+| white { token lexbuf }
+| newline { next_line lexbuf; token lexbuf }
 | ['0'-'9']+ as i { INT (Int64.of_string i) }
 | '"'  { STR (string (Buffer.create 100) lexbuf) } (* see below *)
 | '#'  { waste_comment lexbuf } (* Comment, read til EOL *)
@@ -56,9 +59,9 @@ rule token = parse
 | "def"   { DEF }
 | "defn"  { DEFN }
 | "fn"    { FN }
-| ['a'-'z' 'A'-'Z' '@' '$']['a'-'z' 'A'-'Z' '0'-'9' '@' '_' '?' '$']* as i { ID i }
+| id as i { ID i }
 | eof { EOF }
-| _ { errors lexbuf ("unexpected character: [" ^ (Lexing.lexeme lexbuf) ^ "]") }
+| _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
 
 and string buf = parse (* use buf to build up result *)
 | [^'"' '\n' '\\']+  
@@ -73,9 +76,8 @@ and string buf = parse (* use buf to build up result *)
 | '\\'      { Buffer.add_char buf '\\'; string buf lexbuf }
 
 | '"'       { Buffer.contents buf } (* return *)
-| eof       { error lexbuf "end of input inside of a string" }
-| _         { error lexbuf 
-                "found '%s' - don't know how to handle" @@ Lexing.lexeme lexbuf }
+| eof       { raise (SyntaxError ("Encountered EOF while in string: " ^ Lexing.lexeme lexbuf)) }
+| _         { raise (SyntaxError ("Unexpected char inside string: " ^ Lexing.lexeme lexbuf)) }
 and waste_comment = parse (* use buf to build up result *)
 | '\n'      { token lexbuf }
 | _         { waste_comment lexbuf }

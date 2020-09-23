@@ -50,6 +50,7 @@ expression:
   | LPAREN e = expression RPAREN  { e }
 
   | BANG e = expression { UniExpr (OpNot, e) }
+  | MINUS e = expression { UniExpr (OpNegate, e) }
 
   | e1 = expression TIMES         e2 = expression { BinExpr (OpTimes, e1, e2) }
   | e1 = expression DIV           e2 = expression { BinExpr (OpDiv, e1, e2) }
@@ -67,7 +68,7 @@ expression:
   | e1 = expression SEMICOLON     e2 = expression { BinExpr (OpSemicolon, e1, e2) }
   | IF e1 = expression THEN e2 = expression ELSE e3 = expression { IfExpr (e1, e2, e3) }
   | DEF i = identifier EQUAL e = expression { DefExpr (i, e) }
-  | name = identifier LPAREN args = commaexprs RPAREN { CallExpr (name, args) }
+  | name = identifier LPAREN args = separated_list(COMMA, expression) RPAREN { CallExpr (name, args) }
 // TODO: its auto resolving of shift reduce is how I want it, but I should probably fix it
   | FN args = identifier* EQUAL e = body { FnExpr (args, e) }
   | DEFN name = identifier args = identifier* EQUAL e = body { DefExpr (name, (FnExpr (args, e))) }
@@ -75,21 +76,14 @@ expression:
 body:
   | e = expression { e }
 
-commaexprs:
-  | e = expression el = commaexprs2 { e :: el }
-  | { [] }
-commaexprs2:
-  | COMMA e = expression el = commaexprs2 { e :: el }
-  | { [] }
-
 literal:
   | e = INT   { LitInt e }
   | e = STR   { LitString e }
   | TRUE  { LitBool true }
   | FALSE { LitBool false }
   | i = identifier { LitIdentifier i }
-  | LBRACK      items = commaexprs RBRACK      { LitArray items }
-  | LBRACK_PIPE items = commaexprs RBRACK_PIPE { LitList items }
+  | LBRACK      items = separated_list(COMMA, expression) RBRACK      { LitList items }
+  | LBRACK_PIPE items = separated_list(COMMA, expression) RBRACK_PIPE { LitArray items }
 
 
 identifier:
