@@ -65,7 +65,7 @@
     - String Literals :: ="Hello, World!\n"=
     - Alphabetic Comparisons :: ~<, >, <=, >=, ==~
     - Concatenation :: =+=
-    - String Operators :: =substring, substring_prefix, length, @, set@=
+    - String Operators :: =substring, subprefix, length, @, set@=
 *** Dynamic arrays
     - Array literals :: =[|1, 2, 3|]=
     - Array Operators :: =length, @, set@, push, pop=

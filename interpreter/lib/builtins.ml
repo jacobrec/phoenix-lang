@@ -175,6 +175,18 @@ let set_at p i v =
   | Array a -> Array (Array.mapi (fun id p -> if i = id then v else p) a)
   | _ -> raise (TypeErr "@ is not applicable to this type")
 
+let substring s i =
+  let s = Types.unwrap_string s in
+  let i = Types.unwrap_int i in
+  let i = Int64.to_int i in
+  String (String.sub s i ((String.length s) - i))
+
+let substring_prefix s i =
+  let s = Types.unwrap_string s in
+  let i = Types.unwrap_int i in
+  let i = Int64.to_int i in
+  String (String.sub s 0 i)
+
 let wrap1 fn = 
   let res_fn values = 
     assert ((List.length values) = 1);
@@ -222,6 +234,8 @@ let builtins = [("println",   (wrap1 println));
                 ("length",    (wrap1 length));
                 ("@",         (wrap2 at));
                 ("set@",      (wrap3 set_at));
+                ("substring", (wrap2 substring));
+                ("subprefix", (wrap2 substring_prefix));
 
                 ("car",       (wrap1 car));
                 ("cdr",       (wrap1 cdr))]
