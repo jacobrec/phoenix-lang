@@ -274,7 +274,8 @@ let pfile_close file =
   
 let readchar file =
   let file = Types.unwrap_file_in file in
-  Char (input_char file)
+  try Char (input_char file)
+    with End_of_file -> EOF
   
 let writechar file char =
   let char = Types.unwrap_char char in
@@ -326,6 +327,7 @@ let builtins = [("println",   (wrap1 println));
                 ("function?", (wrap1_bool Types.is_func));
                 ("char?",     (wrap1_bool Types.is_char));
                 ("float?",    (wrap1_bool Types.is_float));
+                ("eof?",      (wrap1_bool Types.is_EOF));
 
                 ("length",    (wrap1 length));
                 ("@",         (wrap2 at));

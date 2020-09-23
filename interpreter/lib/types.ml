@@ -8,6 +8,7 @@ type pfile =
 type ptype =
   | Int48 of int64
   | Bool of bool
+  | EOF
   | String of string
   | Char of char
   | Float of float (* 64bit floats *)
@@ -118,6 +119,10 @@ let is_hash = function
   | Hash _ -> true
   | _ -> false
 
+let is_EOF = function
+  | EOF -> true
+  | _ -> false
+
 
 
 let is_truthy = function
@@ -132,6 +137,7 @@ let is_truthy = function
   | List l -> 0 <> List.length l
   | Hash l -> 0 <> Hashtbl.length l
   | File _ -> true
+  | EOF -> false
   | Closure (_fn, _free, _vals) -> true
 
 let rec seq_to_list = function
@@ -153,3 +159,4 @@ let rec string_of_ptype = function
                           (seq_to_list ((Hashtbl.to_seq v) ())))) ^ "}"
   | File _ -> "[file]"
   | Closure (_fn, _free, _vals) -> "[closure]"
+  | EOF -> "EOF"
