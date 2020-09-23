@@ -226,6 +226,15 @@ let has h k =
   let h = Types.unwrap_hash h in
   Bool (Hashtbl.mem h k)
 
+let ord c =
+  let v = Types.unwrap_char c in
+  Int48 (Int64.of_int (Char.code v))
+
+let chr i =
+  let v = Types.unwrap_int i in
+  let v = Int64.to_int v in
+  Char (Char.chr v)
+
 let wrap1 fn = 
   let res_fn values = 
     assert ((List.length values) = 1);
@@ -284,6 +293,9 @@ let builtins = [("println",   (wrap1 println));
                 ("remove!",   (wrap2 remove));
                 ("get",       (wrap2 get));
                 ("has",       (wrap2 has));
+
+                ("chr",       (wrap1 chr));
+                ("ord",       (wrap1 ord));
 
                 ("car",       (wrap1 car));
                 ("cdr",       (wrap1 cdr))]
