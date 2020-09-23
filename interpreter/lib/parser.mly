@@ -21,12 +21,12 @@
 %left  SEMICOLON COLON
 %right EQUAL
 %right COLON_EQUAL
-%right COLON_COLON
 %right ELSE
 %left OR_OR
 %left AND_AND
 %left EQUAL_EQUAL LESS_EQUAL GREATER_EQUAL
 %left LESS GREATER
+%right COLON_COLON
 %left PLUS MINUS
 %left TIMES DIV MOD
 %left BANG

@@ -33,10 +33,10 @@
 ** Binary Operators (in precedence order)
    - =*, /, %=    :: times, divide, and mod
    - =+, -=       :: plus, minus
+   - =::=         :: cons
    - ~<, >~       :: comparisions
    - ~==, >=, <=~ :: equalities
    - ~&&, ||~     :: logicals
-   - =::=         :: cons
    - ~:=~         :: assignment
    - =;, :=       :: evaluates two expressions and returns the (semi ? second : first)
 
