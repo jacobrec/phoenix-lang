@@ -5,6 +5,8 @@
 %token LPAREN RPAREN LBRACK RBRACK LBRACK_PIPE RBRACK_PIPE LBRACE RBRACE
 %token TRUE FALSE
 
+%token AND_AND OR_OR
+
 %token LESS GREATER LESS_EQUAL GREATER_EQUAL EQUAL_EQUAL EQUAL 
 %token COLON_COLON COLON_EQUAL SEMICOLON COLON COMMA SEMI_SEMI
 
@@ -21,6 +23,8 @@
 %right COLON_EQUAL
 %right COLON_COLON
 %right ELSE
+%left OR_OR
+%left AND_AND
 %left EQUAL_EQUAL LESS_EQUAL GREATER_EQUAL
 %left LESS GREATER
 %left PLUS MINUS
@@ -62,6 +66,8 @@ expression:
   | e1 = expression LESS_EQUAL    e2 = expression { BinExpr (OpLessEqual, e1, e2) }
   | e1 = expression GREATER_EQUAL e2 = expression { BinExpr (OpGreaterEqual, e1, e2) }
   | e1 = expression EQUAL_EQUAL   e2 = expression { BinExpr (OpEqualEqual, e1, e2) }
+  | e1 = expression AND_AND       e2 = expression { ShortBinExpr (OpAnd, e1, e2) }
+  | e1 = expression OR_OR         e2 = expression { ShortBinExpr (OpOr, e1, e2) }
   | e1 = expression COLON_COLON   e2 = expression { BinExpr (OpCons, e1, e2) }
   | e1 = expression COLON_EQUAL   e2 = expression { BinExpr (OpAssign, e1, e2) }
   | e1 = expression COLON         e2 = expression { BinExpr (OpColon, e1, e2) }

@@ -44,6 +44,8 @@ rule token = parse
 | ">=" { GREATER_EQUAL }
 | '<'  { LESS }
 | '>'  { GREATER }
+| "&&" { AND_AND }
+| "||" { OR_OR }
 | ";;" { SEMI_SEMI }
 | "::" { COLON_COLON }
 | ":=" { COLON_EQUAL }

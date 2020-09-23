@@ -33,7 +33,12 @@ and eval_uniop env op e =
                  | _ -> failwith "cannot negate something that's not a number")
   | OpNot -> Bool (if is_truthy v then false else true)
 
-and  eval_binop env op e1 e2 =
+and eval_short_binop env op e1 e2 =
+  let v1 = eval env e1 in
+  match op with
+  | OpAnd -> if is_truthy v1 then eval env e2 else v1
+  | OpOr -> if is_truthy v1 then v1 else eval env e2
+and eval_binop env op e1 e2 =
   let v1 = eval env e1 in
   let v2 = eval env e2 in
   match op with
@@ -61,7 +66,6 @@ and eval_lit env = function
      List (List.map (fun i -> eval env i) v)
   | LitArray v ->
      Array (Array.of_list (List.map (fun i -> eval env i) v))
-  
 
 and eval_if env e1 e2 e3 =
   let v1 = eval env e1 in
@@ -98,6 +102,7 @@ and eval_call env name args =
   | _ -> raise (EvalErr "cannot call non callable object")
 
 and eval env = function
+  | ShortBinExpr (op, e1, e2) -> eval_short_binop env op e1 e2
   | BinExpr (op, e1, e2) -> eval_binop env op e1 e2
   | UniExpr (op, e) -> eval_uniop env op e
   | LitExpr l -> eval_lit env l

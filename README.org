@@ -23,6 +23,7 @@
    - Functions      :: =defn name x = 3 + x=
    - Integers       :: =49=
    - Chars          :: ='a'=
+   - Bool           :: =false=
 
 ** Unary Operators (in precedence order)
    - =()=         :: function call, and expression grouping
@@ -34,6 +35,7 @@
    - =+, -=       :: plus, minus
    - ~<, >~       :: comparisions
    - ~==, >=, <=~ :: equalities
+   - ~&&, ||~     :: logicals
    - =::=         :: cons
    - ~:=~         :: assignment
    - =;, :=       :: evaluates two expressions and returns the (semi ? second : first)
@@ -82,6 +84,8 @@
 *** Chars
     - Char operators :: =chr, ord=
     - Concatenation :: =+=
+*** Bool
+    - negation :: =!=
 
 ** Example Code
    #+BEGIN_SRC
