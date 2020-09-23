@@ -65,7 +65,7 @@ and eval_lit env = function
   | LitList v ->
      List (List.map (fun i -> eval env i) v)
   | LitArray v ->
-     Array (Array.of_list (List.map (fun i -> eval env i) v))
+     Array (ref (Array.of_list (List.map (fun i -> eval env i) v)))
   | LitHash v ->
      let h = Hashtbl.create (List.length v) in
      ignore (List.map (fun (a, b) -> Hashtbl.add h (eval env a) (eval env b)) v);

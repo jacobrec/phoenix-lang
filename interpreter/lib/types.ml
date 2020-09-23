@@ -9,7 +9,7 @@ type ptype =
   | Float of float (* 64bit floats *)
   | Func of pfunc
   | List of ptype list
-  | Array of ptype Array.t
+  | Array of ptype Array.t ref
   | Hash of (ptype, ptype) Hashtbl.t
   | BuiltinFunc of (ptype list -> ptype)
   | Closure of pfunc * identifier list * ptype list
@@ -109,7 +109,7 @@ let is_truthy = function
   | Float v -> 0.0 <> v
   | Func (_args, _e) -> true
   | BuiltinFunc _ -> true
-  | Array l -> 0 <> Array.length l
+  | Array l -> 0 <> Array.length !l
   | List l -> 0 <> List.length l
   | Hash l -> 0 <> Hashtbl.length l
   | Closure (_fn, _free, _vals) -> true
@@ -126,7 +126,7 @@ let rec string_of_ptype = function
   | Float v -> Float.to_string v
   | Func (args, e) -> "[fn " ^ (String.concat " " args) ^ " = " ^ Ast.string_of_expr e ^ "]"
   | BuiltinFunc _ -> "[builtin fn]"
-  | Array v -> "[|" ^ (String.concat ", " (List.map string_of_ptype (Array.to_list v))) ^ "|]"
+  | Array v -> "[|" ^ (String.concat ", " (List.map string_of_ptype (Array.to_list !v))) ^ "|]"
   | List v -> "[" ^ (String.concat ", " (List.map string_of_ptype v)) ^ "]"
   | Hash v -> "{" ^ (String.concat ", "
                        (List.map (fun (a, b) -> (string_of_ptype a) ^ "=>" ^ (string_of_ptype b))

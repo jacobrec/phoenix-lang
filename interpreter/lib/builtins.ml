@@ -11,7 +11,7 @@ let rec equal v1 v2 =
         | (Bool v1, Bool v2) -> Bool.equal v1 v2
         | (Char v1, Char v2) -> Char.equal v1 v2
         | (List v1, List v2) -> list_equal v1 v2
-        | (Array v1, Array v2) -> array_equal v1 v2
+        | (Array v1, Array v2) -> array_equal !v1 !v2
         | (_, _) -> false)
 
 and list_equal l1 l2 =
@@ -156,7 +156,7 @@ let println v1 =
 let length = function
   | String s -> Int48 (Int64.of_int (String.length s))
   | List l -> Int48 (Int64.of_int (List.length l))
-  | Array a -> Int48 (Int64.of_int (Array.length a))
+  | Array a -> Int48 (Int64.of_int (Array.length !a))
   | Hash h -> Int48 (Int64.of_int (Hashtbl.length h))
   | _ -> raise (TypeErr "Cannot take length of this type")
 
@@ -165,14 +165,15 @@ let at p i =
   let i = Int64.to_int (Types.unwrap_int i) in
   match p with
   | String s -> Char (String.get s i)
-  | Array a -> Array.get a i
+  | Array a -> Array.get !a i
   | _ -> raise (TypeErr "@ is not applicable to this type")
 
 let set_at p i v =
+  (* TODO: Make set_at mutate array *)
   let i = Int64.to_int (Types.unwrap_int i) in
   match p with
   | String s -> String (String.mapi (fun id c -> if i = id then Types.unwrap_char v else c) s)
-  | Array a -> Array (Array.mapi (fun id p -> if i = id then v else p) a)
+  | Array a -> Array (ref (Array.mapi (fun id p -> if i = id then v else p) !a))
   | _ -> raise (TypeErr "@ is not applicable to this type")
 
 let substring s i =
@@ -186,6 +187,18 @@ let substring_prefix s i =
   let i = Types.unwrap_int i in
   let i = Int64.to_int i in
   String (String.sub s 0 i)
+
+let push v p =
+  let v = Types.unwrap_array v in
+  v := Array.append !v [|p|];
+  Array v
+
+let pop v =
+  let v = Types.unwrap_array v in
+  let l = (Array.length !v) - 1 in
+  let p = Array.get !v l in
+  v := Array.sub !v 0 l;
+  p
 
 let wrap1 fn = 
   let res_fn values = 
@@ -236,6 +249,9 @@ let builtins = [("println",   (wrap1 println));
                 ("set@",      (wrap3 set_at));
                 ("substring", (wrap2 substring));
                 ("subprefix", (wrap2 substring_prefix));
+
+                ("push!",     (wrap2 push));
+                ("pop!",      (wrap1 pop));
 
                 ("car",       (wrap1 car));
                 ("cdr",       (wrap1 cdr))]
