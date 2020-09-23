@@ -159,12 +159,44 @@ let length = function
   | Array a -> Int48 (Int64.of_int (Array.length a))
   | Hash h -> Int48 (Int64.of_int (Hashtbl.length h))
   | _ -> raise (TypeErr "Cannot take length of this type")
-  
+
+
+let at p i =
+  let i = Int64.to_int (Types.unwrap_int i) in
+  match p with
+  | String s -> Char (String.get s i)
+  | Array a -> Array.get a i
+  | _ -> raise (TypeErr "@ is not applicable to this type")
+
+let set_at p i v =
+  let i = Int64.to_int (Types.unwrap_int i) in
+  match p with
+  | String s -> String (String.mapi (fun id c -> if i = id then Types.unwrap_char v else c) s)
+  | Array a -> Array (Array.mapi (fun id p -> if i = id then v else p) a)
+  | _ -> raise (TypeErr "@ is not applicable to this type")
+
 let wrap1 fn = 
   let res_fn values = 
     assert ((List.length values) = 1);
     let v = List.hd values in
     fn v
+  in res_fn
+
+let wrap2 fn = 
+  let res_fn values = 
+    assert ((List.length values) = 2);
+    let v1 = List.nth values 0 in
+    let v2 = List.nth values 1 in
+    fn v1 v2
+  in res_fn
+
+let wrap3 fn = 
+  let res_fn values = 
+    assert ((List.length values) = 3);
+    let v1 = List.nth values 0 in
+    let v2 = List.nth values 1 in
+    let v3 = List.nth values 2 in
+    fn v1 v2 v3
   in res_fn
 
 let wrap1_bool fn = 
@@ -188,6 +220,8 @@ let builtins = [("println",   (wrap1 println));
                 ("float?",    (wrap1_bool Types.is_float));
 
                 ("length",    (wrap1 length));
+                ("@",         (wrap2 at));
+                ("set@",      (wrap3 set_at));
 
                 ("car",       (wrap1 car));
                 ("cdr",       (wrap1 cdr))]

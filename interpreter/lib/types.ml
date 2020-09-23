@@ -14,6 +14,51 @@ type ptype =
   | BuiltinFunc of (ptype list -> ptype)
   | Closure of pfunc * identifier list * ptype list
 
+let unwrap_int ?(err="Unwrap error, expected int") = function
+  | Int48 i -> i
+  | _ -> failwith err
+
+let unwrap_bool ?(err="Unwrap error, expected bool") = function
+  | Bool i -> i
+  | _ -> failwith err
+
+let unwrap_string ?(err="Unwrap error, expected string") = function
+  | String i -> i
+  | _ -> failwith err
+
+let unwrap_char ?(err="Unwrap error, expected char") = function
+  | Char i -> i
+  | _ -> failwith err
+
+let unwrap_float ?(err="Unwrap error, expected float") = function
+  | Float i -> i
+  | _ -> failwith err
+
+let unwrap_func ?(err="Unwrap error, expected func") = function
+  | Func i -> i
+  | _ -> failwith err
+
+let unwrap_list ?(err="Unwrap error, expected list") = function
+  | List i -> i
+  | _ -> failwith err
+
+let unwrap_array ?(err="Unwrap error, expected array") = function
+  | Array i -> i
+  | _ -> failwith err
+
+let unwrap_hash ?(err="Unwrap error, expected hash") = function
+  | Hash i -> i
+  | _ -> failwith err
+
+let unwrap_builtin ?(err="Unwrap error, expected builtin") = function
+  | BuiltinFunc i -> i
+  | _ -> failwith err
+
+let unwrap_closure ?(err="Unwrap error, expected closure") = function
+  | Closure (a, b, c) -> (a, b, c)
+  | _ -> failwith err
+
+
 let is_int = function
   | Int48 _ -> true
   | _ -> false
