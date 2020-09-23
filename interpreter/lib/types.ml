@@ -121,8 +121,8 @@ let rec seq_to_list = function
 let rec string_of_ptype = function
   | Int48 v -> Int64.to_string v
   | Bool v -> if v then "true" else "false"
-  | String v -> v
-  | Char v -> String.make 1 v
+  | String v -> "\"" ^ (String.escaped v) ^ "\""
+  | Char v -> "'" ^ (String.make 1 v) ^ "'"
   | Float v -> Float.to_string v
   | Func (args, e) -> "[fn " ^ (String.concat " " args) ^ " = " ^ Ast.string_of_expr e ^ "]"
   | BuiltinFunc _ -> "[builtin fn]"
