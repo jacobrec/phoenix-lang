@@ -31,6 +31,7 @@ let add v1 v2 =
   | (Float v1, Int48 v2) -> Float (v1 +. (Int64.to_float v2))
   | (Int48 v1, Float v2) -> Float ((Int64.to_float v1) +. v2)
   | (Float v1, Float v2) -> Float (v1 +. v2)
+  | (String v1, String v2) -> String (v1 ^ v2)
   | (_, _) -> raise (TypeErr "Cannot add these types")
 
 (* For the - operator *)
@@ -75,47 +76,54 @@ let less v1 v2 =
   let icmp i1 i2 = i1 < i2 in
   let fcmp f1 f2 = -1 = Float.compare f1 f2 in
   let b = match (v1, v2) with
-  | (Int48 v1, Int48 v2) -> icmp v1 v2
-  | (Float v1, Int48 v2) -> fcmp v1 (Int64.to_float v2)
-  | (Int48 v1, Float v2) -> fcmp (Int64.to_float v1) v2
-  | (Float v1, Float v2) -> fcmp v1 v2
-  | (_, _) -> raise (TypeErr "Cannot check less then of these types") in
+    | (Int48 v1, Int48 v2) -> icmp v1 v2
+    | (Float v1, Int48 v2) -> fcmp v1 (Int64.to_float v2)
+    | (Int48 v1, Float v2) -> fcmp (Int64.to_float v1) v2
+    | (Float v1, Float v2) -> fcmp v1 v2
+    | (String v1, String v2) -> -1 = String.compare v1 v2
+    | (_, _) -> raise (TypeErr "Cannot check less then of these types") in
   Bool b
-  
+
 (* For the > operator *)
 let greater v1 v2 =
   let icmp i1 i2 = i1 > i2 in
   let fcmp f1 f2 = 1 = Float.compare f1 f2 in
-  match (v1, v2) with
-  | (Int48 v1, Int48 v2) -> Bool (icmp v1 v2)
-  | (Float v1, Int48 v2) -> Bool (fcmp v1 (Int64.to_float v2))
-  | (Int48 v1, Float v2) -> Bool (fcmp (Int64.to_float v1) v2)
-  | (Float v1, Float v2) -> Bool (fcmp v1 v2)
-  | (_, _) -> raise (TypeErr "Cannot check greater then of these types")
+  let b = match (v1, v2) with
+    | (Int48 v1, Int48 v2) -> icmp v1 v2
+    | (Float v1, Int48 v2) -> fcmp v1 (Int64.to_float v2)
+    | (Int48 v1, Float v2) -> fcmp (Int64.to_float v1) v2
+    | (Float v1, Float v2) -> fcmp v1 v2
+    | (String v1, String v2) -> 1 = String.compare v1 v2
+    | (_, _) -> raise (TypeErr "Cannot check greater then of these types") in
+  Bool b
 
 (* For the <= operator *)
 let less_equal v1 v2 =
   let icmp i1 i2 = i1 <= i2 in
   let fcmp f1 f2 = let v = Float.compare f1 f2 in
                    v = -1 || v = 0 in
-  match (v1, v2) with
-  | (Int48 v1, Int48 v2) -> Bool (icmp v1 v2)
-  | (Float v1, Int48 v2) -> Bool (fcmp v1 (Int64.to_float v2))
-  | (Int48 v1, Float v2) -> Bool (fcmp (Int64.to_float v1) v2)
-  | (Float v1, Float v2) -> Bool (fcmp v1 v2)
-  | (_, _) -> raise (TypeErr "Cannot check less or equal of these types")
+  let b = match (v1, v2) with
+    | (Int48 v1, Int48 v2) -> icmp v1 v2
+    | (Float v1, Int48 v2) -> fcmp v1 (Int64.to_float v2)
+    | (Int48 v1, Float v2) -> fcmp (Int64.to_float v1) v2
+    | (Float v1, Float v2) -> fcmp v1 v2
+    | (String v1, String v2) -> 1 <> String.compare v1 v2
+    | (_, _) -> raise (TypeErr "Cannot check less or equal of these types") in
+  Bool b
 
 (* For the >= operator *)
 let greater_equal v1 v2 =
   let icmp i1 i2 = i1 >= i2 in
   let fcmp f1 f2 = let v = Float.compare f1 f2 in
                    v = 1 || v = 0 in
-  match (v1, v2) with
-  | (Int48 v1, Int48 v2) -> Bool (icmp v1 v2)
-  | (Float v1, Int48 v2) -> Bool (fcmp v1 (Int64.to_float v2))
-  | (Int48 v1, Float v2) -> Bool (fcmp (Int64.to_float v1) v2)
-  | (Float v1, Float v2) -> Bool (fcmp v1 v2)
-  | (_, _) -> raise (TypeErr "Cannot check greater or equal of these types")
+  let b = match (v1, v2) with
+    | (Int48 v1, Int48 v2) -> icmp v1 v2
+    | (Float v1, Int48 v2) -> fcmp v1 (Int64.to_float v2)
+    | (Int48 v1, Float v2) -> fcmp (Int64.to_float v1) v2
+    | (Float v1, Float v2) -> fcmp v1 v2
+    | (String v1, String v2) -> -1 <> String.compare v1 v2
+    | (_, _) -> raise (TypeErr "Cannot check greater or equal of these types") in
+  Bool b
 
 (* For the :: operator *)
 let cons v1 v2 =
@@ -144,6 +152,13 @@ let println v1 =
   let v = print v1 in
   print_newline ();
   v
+
+let length = function
+  | String s -> Int48 (Int64.of_int (String.length s))
+  | List l -> Int48 (Int64.of_int (List.length l))
+  | Array a -> Int48 (Int64.of_int (Array.length a))
+  | Hash h -> Int48 (Int64.of_int (Hashtbl.length h))
+  | _ -> raise (TypeErr "Cannot take length of this type")
   
 let wrap1 fn = 
   let res_fn values = 
@@ -161,13 +176,18 @@ let wrap1_bool fn =
 
 let builtins = [("println",   (wrap1 println));
                 ("print",     (wrap1 print));
+
                 ("int?",      (wrap1_bool Types.is_int));
                 ("bool?",     (wrap1_bool Types.is_bool));
                 ("string?",   (wrap1_bool Types.is_string));
                 ("list?",     (wrap1_bool Types.is_list));
                 ("array?",    (wrap1_bool Types.is_array));
+                ("hash?",     (wrap1_bool Types.is_hash));
                 ("function?", (wrap1_bool Types.is_func));
                 ("char?",     (wrap1_bool Types.is_char));
                 ("float?",    (wrap1_bool Types.is_float));
+
+                ("length",    (wrap1 length));
+
                 ("car",       (wrap1 car));
                 ("cdr",       (wrap1 cdr))]

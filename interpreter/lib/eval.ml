@@ -129,9 +129,9 @@ let base_env = Enviroment.create ()
 let should_init_base_env = ref true
 let rec env_with_builtins _ =
   if !should_init_base_env then begin
-  should_init_base_env := false;
-  
-  ignore (List.map (fun (a, b) -> Enviroment.add base_env a (Types.BuiltinFunc b)) Builtins.builtins);
+      should_init_base_env := false;
+      ignore (List.map (fun (a, b) ->
+                  Enviroment.add base_env a (Types.BuiltinFunc b)) Builtins.builtins);
   end else ();
   base_env
   
