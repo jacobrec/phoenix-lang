@@ -169,11 +169,17 @@ let at p i =
   | _ -> raise (TypeErr "@ is not applicable to this type")
 
 let set_at p i v =
-  (* TODO: Make set_at mutate array *)
   let i = Int64.to_int (Types.unwrap_int i) in
   match p with
   | String s -> String (String.mapi (fun id c -> if i = id then Types.unwrap_char v else c) s)
   | Array a -> Array (ref (Array.mapi (fun id p -> if i = id then v else p) !a))
+  | _ -> raise (TypeErr "@ is not applicable to this type")
+
+let set_at_mut p i v =
+  let i = Int64.to_int (Types.unwrap_int i) in
+  match p with
+  | Array a -> Array.set !a i v; Array a
+  | String _ -> raise (TypeErr "Cannot set@! an immutable string")
   | _ -> raise (TypeErr "@ is not applicable to this type")
 
 let substring s i =
@@ -252,6 +258,7 @@ let builtins = [("println",   (wrap1 println));
 
                 ("push!",     (wrap2 push));
                 ("pop!",      (wrap1 pop));
+                ("set@!",     (wrap3 set_at_mut));
 
                 ("car",       (wrap1 car));
                 ("cdr",       (wrap1 cdr))]
