@@ -10,6 +10,7 @@ type ptype =
   | Func of pfunc
   | List of ptype list
   | Array of ptype Array.t
+  | Hash of (ptype, ptype) Hashtbl.t
   | BuiltinFunc of (ptype list -> ptype)
   | Closure of pfunc * identifier list * ptype list
 
@@ -49,6 +50,10 @@ let is_list = function
   | List _ -> true
   | _ -> false
 
+let is_hash = function
+  | Hash _ -> true
+  | _ -> false
+
 
 
 let is_truthy = function
@@ -61,8 +66,13 @@ let is_truthy = function
   | BuiltinFunc _ -> true
   | Array l -> 0 <> Array.length l
   | List l -> 0 <> List.length l
+  | Hash l -> 0 <> Hashtbl.length l
   | Closure (_fn, _free, _vals) -> true
 
+let rec seq_to_list = function
+  | Seq.Cons (a, s) -> a :: (seq_to_list (s ()))
+  | Seq.Nil -> []
+  
 let rec string_of_ptype = function
   | Int48 v -> Int64.to_string v
   | Bool v -> if v then "true" else "false"
@@ -73,4 +83,7 @@ let rec string_of_ptype = function
   | BuiltinFunc _ -> "[builtin fn]"
   | Array v -> "[|" ^ (String.concat ", " (List.map string_of_ptype (Array.to_list v))) ^ "|]"
   | List v -> "[" ^ (String.concat ", " (List.map string_of_ptype v)) ^ "]"
+  | Hash v -> "{" ^ (String.concat ", "
+                       (List.map (fun (a, b) -> (string_of_ptype a) ^ "=>" ^ (string_of_ptype b))
+                          (seq_to_list ((Hashtbl.to_seq v) ())))) ^ "}"
   | Closure (_fn, _free, _vals) -> "[closure]"

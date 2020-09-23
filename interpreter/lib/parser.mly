@@ -4,6 +4,7 @@
 %token PLUS MINUS TIMES DIV MOD
 %token LPAREN RPAREN LBRACK RBRACK LBRACK_PIPE RBRACK_PIPE LBRACE RBRACE
 %token TRUE FALSE
+%token EQUAL_GREATER
 
 %token AND_AND OR_OR
 
@@ -16,7 +17,6 @@
 %token BANG
 
 %token EOF
-
 /* Low Precedence */
 %left  SEMICOLON COLON
 %right EQUAL
@@ -82,6 +82,9 @@ expression:
 body:
   | e = expression { e }
 
+hashpair:
+  | e1 = expression EQUAL_GREATER e2 = expression { (e1, e2) }
+
 literal:
   | e = INT   { LitInt e }
   | e = STR   { LitString e }
@@ -90,6 +93,7 @@ literal:
   | i = identifier { LitIdentifier i }
   | LBRACK      items = separated_list(COMMA, expression) RBRACK      { LitList items }
   | LBRACK_PIPE items = separated_list(COMMA, expression) RBRACK_PIPE { LitArray items }
+  | LBRACE      items = separated_list(COMMA, hashpair)   RBRACE      { LitHash items }
 
 
 identifier:

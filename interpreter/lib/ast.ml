@@ -31,6 +31,7 @@ type literal =
   | LitBool       of bool
   | LitArray      of expr list
   | LitList       of expr list
+  | LitHash       of (expr * expr) list
 
 and expr =
   | UniExpr      of uniop * expr
@@ -90,7 +91,9 @@ let rec string_of_expr expr =
   | LitExpr l -> string_of_literal l
   | CallExpr (n, el) -> (string_of_identifier n) ^ "(" ^
                            (string_of_expression_list el) ^ ")"
+  and string_of_hashpair (l, r) = (string_of_expr l) ^ "=>" ^ (string_of_expr r)
   and string_of_expression_list il = (String.concat ", " (List.map string_of_expr il))
+  and string_of_hashpair_list il = (String.concat ", " (List.map string_of_hashpair il))
   and string_of_literal lit =
     match lit with
     | LitInt i -> Int64.to_string i
@@ -99,6 +102,7 @@ let rec string_of_expr expr =
     | LitBool b -> if b then "true" else "false"
     | LitArray b -> "[|" ^ (string_of_expression_list b) ^ "|]"
     | LitList b -> "[" ^ (string_of_expression_list b) ^ "]"
+    | LitHash b -> "{" ^ (string_of_hashpair_list b) ^ "}"
 
 let string_of_stmt stmt =
   match stmt with
