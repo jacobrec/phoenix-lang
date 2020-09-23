@@ -48,7 +48,40 @@
 ** Statement Types
    - ExprStmt :: =EXPR=
    - DefnStmt :: =defn NAME NAME* = EXPR=
-
+     
+** Builtin Functions
+   The goal is to have a minimal set of builtins on which anything can
+   be built on top of. Mainly primatives for each type.
+*** Integers
+    - Number literals :: =958=
+    - Arithmatic :: =+, -, *, /, %=
+    - Comparisons :: ~<, >, <=, >=, ==~
+*** Symbols
+    - Symbol literals :: =:symbol=
+    - Comparison :: ~==~
+*** Strings
+    - String Literals :: ="Hello, World!\n"=
+    - Alphabetic Comparisons :: ~<, >, <=, >=, ==~
+    - Concatenation :: =+=
+    - String Operators :: =substring, substring_prefix, length, @, set@=
+*** Dynamic arrays
+    - Array literals :: =[|1, 2, 3|]=
+    - Array Operators :: =length, @, set@, push, pop=
+*** Linked list
+    - List literals :: =[1, 2, [], 4]=
+    - cons :: =::=
+    - car, cdr :: =car, cdr=
+    - concat :: =concat=
+*** Hashmaps
+    - Hash literals :: ={:a => "1", :b => "2"}=
+    - Hash Operators :: =insert, has, get, remove=
+*** Files
+    - File operators :: =open, close, readchar, writechar=
+*** Functions
+    - Function operators :: =apply=
+*** Chars
+    - Char operators :: =chr, ord=
+    - Concatenation :: =+=
 
 ** Example Code
    #+BEGIN_SRC
