@@ -85,8 +85,8 @@ let rec string_of_expr expr =
     | LitString s -> "\"" ^ s ^ "\"" (* TODO: escape string properly *)
     | LitIdentifier s -> string_of_identifier s
     | LitBool b -> if b then "true" else "false"
-    | LitArray b -> "[" ^ (string_of_expression_list b) ^ "]"
-    | LitList b -> "[|" ^ (string_of_expression_list b) ^ "|]"
+    | LitArray b -> "[|" ^ (string_of_expression_list b) ^ "|]"
+    | LitList b -> "[" ^ (string_of_expression_list b) ^ "]"
 
 let string_of_stmt stmt =
   match stmt with

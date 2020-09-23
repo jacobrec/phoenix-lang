@@ -61,6 +61,6 @@ let rec string_of_ptype = function
   | Float v -> Float.to_string v
   | Func (args, e) -> "[fn " ^ (String.concat " " args) ^ " = " ^ Ast.string_of_expr e ^ "]"
   | BuiltinFunc _ -> "[builtin fn]"
-  | Array v -> "[" ^ (String.concat ", " (List.map string_of_ptype (Array.to_list v))) ^ "]"
-  | List v -> "[|" ^ (String.concat ", " (List.map string_of_ptype v)) ^ "|]"
+  | Array v -> "[|" ^ (String.concat ", " (List.map string_of_ptype (Array.to_list v))) ^ "|]"
+  | List v -> "[" ^ (String.concat ", " (List.map string_of_ptype v)) ^ "]"
   | Closure (_fn, _free, _vals) -> "[closure]"
