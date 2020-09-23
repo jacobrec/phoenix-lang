@@ -68,12 +68,12 @@
     - String Operators :: =substring, subprefix, length, @, set@=
 *** Dynamic arrays
     - Array literals :: =[|1, 2, 3|]=
-    - Array Operators :: =length, @, set@, push, pop=
+    - Array Operators :: =length, @, set@!, set@, push!, pop!, +=
 *** Linked list
     - List literals :: =[1, 2, [], 4]=
     - cons :: =::=
     - car, cdr :: =car, cdr=
-    - concat :: =concat=
+    - concat :: =+=
 *** Hashmaps
     - Hash literals :: ={:a => "1", :b => "2"}=
     - Hash Operators :: =insert, has, get, remove=

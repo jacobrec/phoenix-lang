@@ -32,6 +32,8 @@ let add v1 v2 =
   | (Int48 v1, Float v2) -> Float ((Int64.to_float v1) +. v2)
   | (Float v1, Float v2) -> Float (v1 +. v2)
   | (String v1, String v2) -> String (v1 ^ v2)
+  | (List v1, List v2) -> List (List.append v1 v2)
+  | (Array v1, Array v2) -> Array (ref (Array.append !v1 !v2))
   | (_, _) -> raise (TypeErr "Cannot add these types")
 
 (* For the - operator *)
