@@ -146,9 +146,13 @@ let cdr v1 =
   | _ -> raise (TypeErr "Cannot take cdr of non list")
 
 let print v1 =
-  let str = string_of_ptype v1 in
-  print_string str;
-  String str
+  match v1 with 
+  | String str -> print_string str; String str
+  | Char c -> print_char c; String (String.make 1 c)
+  | _ ->
+     let str = string_of_ptype v1 in
+     print_string str;
+     String str
 
 let println v1 =
   let v = print v1 in
