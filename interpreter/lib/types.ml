@@ -41,6 +41,16 @@ let is_closure = function
   | Closure _ -> true
   | _ -> false
 
+let is_array = function
+  | Array _ -> true
+  | _ -> false
+
+let is_list = function
+  | List _ -> true
+  | _ -> false
+
+
+
 let is_truthy = function
   | Int48 v -> v <> 0L
   | Bool v -> v

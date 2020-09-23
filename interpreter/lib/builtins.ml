@@ -129,8 +129,22 @@ let wrap1 fn =
     fn v
   in res_fn
 
+let wrap1_bool fn = 
+  let fn2 = wrap1 fn in
+  let res values =
+    Bool (fn2 values)
+  in res
 
-let builtins = [("println", (wrap1 println));
-                ("print",   (wrap1 print));
-                ("car",     (wrap1 car));
-                ("cdr",     (wrap1 cdr))]
+
+let builtins = [("println",   (wrap1 println));
+                ("print",     (wrap1 print));
+                ("int?",      (wrap1_bool Types.is_int));
+                ("bool?",     (wrap1_bool Types.is_bool));
+                ("string?",   (wrap1_bool Types.is_string));
+                ("list?",     (wrap1_bool Types.is_list));
+                ("array?",    (wrap1_bool Types.is_array));
+                ("function?", (wrap1_bool Types.is_func));
+                ("char?",     (wrap1_bool Types.is_char));
+                ("float?",    (wrap1_bool Types.is_float));
+                ("car",       (wrap1 car));
+                ("cdr",       (wrap1 cdr))]
