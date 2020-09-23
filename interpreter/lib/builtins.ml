@@ -1,6 +1,29 @@
 open Types
 exception TypeErr of string
 
+
+(* For the == operator *)
+let rec equal v1 v2 =
+  Bool (match (v1, v2) with
+        | (Int48 v1, Int48 v2) -> Int64.equal v1 v2
+        | (Float v1, Float v2) -> Float.equal v1 v2
+        | (String v1, String v2) -> String.equal v1 v2
+        | (Bool v1, Bool v2) -> Bool.equal v1 v2
+        | (Char v1, Char v2) -> Char.equal v1 v2
+        | (List v1, List v2) -> list_equal v1 v2
+        | (Array v1, Array v2) -> array_equal v1 v2
+        | (_, _) -> false)
+
+and list_equal l1 l2 =
+  if (List.length l1) = (List.length l2) then
+    List.for_all2 (fun a b -> is_truthy (equal a b)) l1 l2
+  else false
+
+and array_equal l1 l2 =
+  if (Array.length l1) = (Array.length l2) then
+    Array.for_all2 (fun a b -> is_truthy (equal a b)) l1 l2
+  else false
+
 (* For the + operator *)
 let add v1 v2 =
   match (v1, v2) with

@@ -49,7 +49,7 @@ and eval_binop env op e1 e2 =
   | OpMod -> Builtins.modulo v1 v2
   | OpLess -> Builtins.less v1 v2
   | OpGreater -> Builtins.greater v1 v2
-  | OpEqualEqual -> raise (EvalErr "Equality is not yet supported")
+  | OpEqualEqual -> Builtins.equal v1 v2
   | OpGreaterEqual -> Builtins.greater_equal v1 v2
   | OpLessEqual -> Builtins.less_equal v1 v2
   | OpCons -> Builtins.cons v1 v2
