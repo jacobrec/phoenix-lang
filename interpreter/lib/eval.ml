@@ -27,7 +27,10 @@ let rec call env fn args =
 and eval_uniop env op e =
   let v = eval env e in
   match op with
-  | OpNegate -> v
+  | OpNegate -> (match v with
+                 | Int48 v -> Int48 (Int64.neg v)
+                 | Float v -> Float (Float.neg v)
+                 | _ -> failwith "cannot negate something that's not a number")
   | OpNot -> Bool (if is_truthy v then false else true)
 
 and  eval_binop env op e1 e2 =
@@ -118,10 +121,8 @@ let should_init_base_env = ref true
 let rec env_with_builtins _ =
   if !should_init_base_env then begin
   should_init_base_env := false;
-  Enviroment.add base_env "println" (Types.BuiltinFunc Builtins.println);
-  Enviroment.add base_env "print" (Types.BuiltinFunc Builtins.print);
-  Enviroment.add base_env "car" (Types.BuiltinFunc (Builtins.wrap1 Builtins.car));
-  Enviroment.add base_env "cdr" (Types.BuiltinFunc (Builtins.wrap1 Builtins.cdr));
+  
+  ignore (List.map (fun (a, b) -> Enviroment.add base_env a (Types.BuiltinFunc b)) Builtins.builtins);
   end else ();
   base_env
   

@@ -15,15 +15,14 @@
 ** Types
    - Symbols        :: =:hello=
    - Strings        :: ="I even have escape sequences\n"=
-   - Dynamic Arrays :: =[1, 2, 3]=
-   - Linked Lists   :: =<1, 2, 3>=
-   - Hashmaps       :: ={:a, 1; :b, 2}=
+   - Dynamic Arrays :: =[|1, 2, 3|]=
+   - Linked Lists   :: =[1, 2, 3]=
+   - Hashmaps       :: ={:a => 1, :b => 2}=
+   - Files          :: =open("filepath.txt", "r")=
    - Closures       :: =fn x = 3 + x=
    - Functions      :: =defn name x = 3 + x=
    - Integers       :: =49=
    - Chars          :: ='a'=
-
-1 + if (true) 2 else 3 + 4 :: should this be 7 or 3?
 
 ** Unary Operators (in precedence order)
    - =()=         :: function call, and expression grouping
@@ -31,8 +30,8 @@
    - =!=          :: not
 
 ** Binary Operators (in precedence order)
-   - =+, -=       :: plus, minus
    - =*, /, %=    :: times, divide, and mod
+   - =+, -=       :: plus, minus
    - ~<, >~       :: comparisions
    - ~==, >=, <=~ :: equalities
    - =::=         :: cons

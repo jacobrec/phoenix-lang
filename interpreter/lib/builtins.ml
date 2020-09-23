@@ -1,6 +1,7 @@
 open Types
 exception TypeErr of string
 
+(* For the + operator *)
 let add v1 v2 =
   match (v1, v2) with
   | (Int48 v1, Int48 v2) -> Int48 (Int64.add v1 v2)
@@ -9,6 +10,7 @@ let add v1 v2 =
   | (Float v1, Float v2) -> Float (v1 +. v2)
   | (_, _) -> raise (TypeErr "Cannot add these types")
 
+(* For the - operator *)
 let subtract v1 v2 =
   match (v1, v2) with
   | (Int48 v1, Int48 v2) -> Int48 (Int64.sub v1 v2)
@@ -17,6 +19,7 @@ let subtract v1 v2 =
   | (Float v1, Float v2) -> Float (v1 -. v2)
   | (_, _) -> raise (TypeErr "Cannot subtract these types")
 
+(* For the * operator *)
 let times v1 v2 =
   match (v1, v2) with
   | (Int48 v1, Int48 v2) -> Int48 (Int64.mul v1 v2)
@@ -25,6 +28,7 @@ let times v1 v2 =
   | (Float v1, Float v2) -> Float (v1 *. v2)
   | (_, _) -> raise (TypeErr "Cannot multiply these types")
 
+(* For the / operator *)
 let divide v1 v2 =
   match (v1, v2) with
   | (Int48 v1, Int48 v2) -> Int48 (Int64.div v1 v2)
@@ -33,6 +37,7 @@ let divide v1 v2 =
   | (Float v1, Float v2) -> Float (v1 /. v2)
   | (_, _) -> raise (TypeErr "Cannot divide these types")
 
+(* For the % operator *)
 let modulo v1 v2 =
   match (v1, v2) with
   | (Int48 v1, Int48 v2) -> Int48 (let r = Int64.rem v1 v2 in
@@ -42,6 +47,7 @@ let modulo v1 v2 =
                                    if r >= 0.0 then r else r +. f2)
   | (_, _) -> raise (TypeErr "Cannot modulo these types")
 
+(* For the < operator *)
 let less v1 v2 =
   let icmp i1 i2 = i1 < i2 in
   let fcmp f1 f2 = -1 = Float.compare f1 f2 in
@@ -53,7 +59,7 @@ let less v1 v2 =
   | (_, _) -> raise (TypeErr "Cannot check less then of these types") in
   Bool b
   
-  
+(* For the > operator *)
 let greater v1 v2 =
   let icmp i1 i2 = i1 > i2 in
   let fcmp f1 f2 = 1 = Float.compare f1 f2 in
@@ -64,6 +70,7 @@ let greater v1 v2 =
   | (Float v1, Float v2) -> Bool (fcmp v1 v2)
   | (_, _) -> raise (TypeErr "Cannot check greater then of these types")
 
+(* For the <= operator *)
 let less_equal v1 v2 =
   let icmp i1 i2 = i1 <= i2 in
   let fcmp f1 f2 = let v = Float.compare f1 f2 in
@@ -75,6 +82,7 @@ let less_equal v1 v2 =
   | (Float v1, Float v2) -> Bool (fcmp v1 v2)
   | (_, _) -> raise (TypeErr "Cannot check less or equal of these types")
 
+(* For the >= operator *)
 let greater_equal v1 v2 =
   let icmp i1 i2 = i1 >= i2 in
   let fcmp f1 f2 = let v = Float.compare f1 f2 in
@@ -86,6 +94,7 @@ let greater_equal v1 v2 =
   | (Float v1, Float v2) -> Bool (fcmp v1 v2)
   | (_, _) -> raise (TypeErr "Cannot check greater or equal of these types")
 
+(* For the :: operator *)
 let cons v1 v2 =
   match v2 with
   | List l -> List (v1 :: l)
@@ -103,15 +112,13 @@ let cdr v1 =
   | List _ -> raise (TypeErr "Cannot take cdr of empty list")
   | _ -> raise (TypeErr "Cannot take cdr of non list")
 
-let print values =
-  assert ((List.length values) = 1);
-  let v = List.hd values in
-  let str = string_of_ptype v in
+let print v1 =
+  let str = string_of_ptype v1 in
   print_string str;
   String str
 
-let println values =
-  let v = print values in
+let println v1 =
+  let v = print v1 in
   print_newline ();
   v
   
@@ -122,3 +129,8 @@ let wrap1 fn =
     fn v
   in res_fn
 
+
+let builtins = [("println", (wrap1 println));
+                ("print",   (wrap1 print));
+                ("car",     (wrap1 car));
+                ("cdr",     (wrap1 cdr))]
