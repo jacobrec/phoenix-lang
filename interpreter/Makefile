@@ -6,10 +6,10 @@ BYTE_TARGET=bin/main.bc
 
 
 run: $(BIN)/$(BYTE_TARGET)
-	dune exec $(BYTE_TARGET)
+	rlwrap dune exec $(BYTE_TARGET)
 
 run_native: $(BIN)/$(NATIVE_TARGET)
-	dune exec $(NATIVE_TARGET)
+	rlwrap dune exec $(NATIVE_TARGET)
 
 tests: clean $(BIN)/$(BYTE_TARGET) $(BIN)/$(NATIVE_TARGET)
 	cd ../ && ./run_tests.sh
