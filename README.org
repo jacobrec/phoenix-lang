@@ -76,7 +76,7 @@
     - concat :: =+=
 *** Hashmaps
     - Hash literals :: ={:a => "1", :b => "2"}=
-    - Hash Operators :: =insert, has, get, remove=
+    - Hash Operators :: =insert!, has, get, remove!, length=
 *** Files
     - File operators :: =open, close, readchar, writechar=
 *** Functions

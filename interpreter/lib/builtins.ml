@@ -208,6 +208,24 @@ let pop v =
   v := Array.sub !v 0 l;
   p
 
+let insert h k v =
+  let h = Types.unwrap_hash h in
+  Hashtbl.replace h k v;
+  Hash h
+
+let remove h k =
+  let h = Types.unwrap_hash h in
+  Hashtbl.remove h k;
+  Hash h
+
+let get h k =
+  let h = Types.unwrap_hash h in
+  Hashtbl.find h k
+
+let has h k =
+  let h = Types.unwrap_hash h in
+  Bool (Hashtbl.mem h k)
+
 let wrap1 fn = 
   let res_fn values = 
     assert ((List.length values) = 1);
@@ -261,6 +279,11 @@ let builtins = [("println",   (wrap1 println));
                 ("push!",     (wrap2 push));
                 ("pop!",      (wrap1 pop));
                 ("set@!",     (wrap3 set_at_mut));
+
+                ("insert!",   (wrap3 insert));
+                ("remove!",   (wrap2 remove));
+                ("get",       (wrap2 get));
+                ("has",       (wrap2 has));
 
                 ("car",       (wrap1 car));
                 ("cdr",       (wrap1 cdr))]
