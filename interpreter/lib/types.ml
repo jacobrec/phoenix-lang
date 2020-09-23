@@ -1,6 +1,10 @@
 open Ast
 
 type pfunc = identifier list * expr
+type pfile =
+  | OutFile of out_channel
+  | InFile of in_channel
+
 type ptype =
   | Int48 of int64
   | Bool of bool
@@ -11,6 +15,7 @@ type ptype =
   | List of ptype list
   | Array of ptype Array.t ref
   | Hash of (ptype, ptype) Hashtbl.t
+  | File of pfile
   | BuiltinFunc of (ptype list -> ptype)
   | Closure of pfunc * identifier list * ptype list
 
@@ -48,6 +53,20 @@ let unwrap_array ?(err="Unwrap error, expected array") = function
 
 let unwrap_hash ?(err="Unwrap error, expected hash") = function
   | Hash i -> i
+  | _ -> failwith err
+
+let unwrap_file ?(err="Unwrap error, expected file") = function
+  | File i -> i
+  | _ -> failwith err
+
+let unwrap_file_in ?(err="Unwrap error, expected in file") f =
+  match unwrap_file f with
+  | InFile f -> f
+  | _ -> failwith err
+
+let unwrap_file_out ?(err="Unwrap error, expected out file") f =
+  match unwrap_file f with
+  | OutFile f -> f
   | _ -> failwith err
 
 let unwrap_builtin ?(err="Unwrap error, expected builtin") = function
@@ -112,6 +131,7 @@ let is_truthy = function
   | Array l -> 0 <> Array.length !l
   | List l -> 0 <> List.length l
   | Hash l -> 0 <> Hashtbl.length l
+  | File _ -> true
   | Closure (_fn, _free, _vals) -> true
 
 let rec seq_to_list = function
@@ -131,4 +151,5 @@ let rec string_of_ptype = function
   | Hash v -> "{" ^ (String.concat ", "
                        (List.map (fun (a, b) -> (string_of_ptype a) ^ "=>" ^ (string_of_ptype b))
                           (seq_to_list ((Hashtbl.to_seq v) ())))) ^ "}"
+  | File _ -> "[file]"
   | Closure (_fn, _free, _vals) -> "[closure]"

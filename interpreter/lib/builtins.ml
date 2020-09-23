@@ -239,6 +239,50 @@ let chr i =
   let v = Int64.to_int v in
   Char (Char.chr v)
 
+let pfile_open path mode =
+  let mode = Types.unwrap_string mode in
+  let path = Types.unwrap_string path in
+  let bin = String.contains mode 'b' in
+  let append = String.contains mode 'a' in
+  let write = String.contains mode 'w' in
+  let read = String.contains mode 'r' in
+  let create = String.contains mode '+' in
+  let mode_in = read && not write && not append in
+  let mode_append = not read && not write && append in
+  let mode_truncate = not read && write && not append in
+  let perm = 0o644 in
+  let flags = List.concat [
+                  if mode_in then       [Open_rdonly] else [];
+                  if mode_append then   [Open_append; Open_wronly] else [];
+                  if mode_truncate then [Open_trunc; Open_wronly] else [];
+                  if bin then           [Open_binary] else [Open_text];
+                  if create then        [Open_creat] else [];
+                ] in
+  if mode_in then
+    File (InFile (open_in_gen flags perm path))
+  else if mode_append || mode_truncate then
+    File (OutFile (open_out_gen flags perm path))
+  else
+    raise (TypeErr "Illegal combination of file opening flags")
+    
+let pfile_close file =
+  let file = Types.unwrap_file file in
+  (match file with
+   | InFile f -> close_in f
+   | OutFile f -> close_out f);
+  List []
+  
+let readchar file =
+  let file = Types.unwrap_file_in file in
+  Char (input_char file)
+  
+let writechar file char =
+  let char = Types.unwrap_char char in
+  let file = Types.unwrap_file_out file in
+  output_char file char;
+  List []
+                  
+
 let wrap1 fn = 
   let res_fn values = 
     assert ((List.length values) = 1);
@@ -300,6 +344,11 @@ let builtins = [("println",   (wrap1 println));
 
                 ("chr",       (wrap1 chr));
                 ("ord",       (wrap1 ord));
+
+                ("open!",      (wrap2 pfile_open));
+                ("close!",     (wrap1 pfile_close));
+                ("readchar!",  (wrap1 readchar));
+                ("writechar!", (wrap2 writechar));
 
                 ("car",       (wrap1 car));
                 ("cdr",       (wrap1 cdr))]
