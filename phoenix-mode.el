@@ -7,8 +7,8 @@
 (setq phoenix-font-lock-keywords
       (let* ((phoenix-identifier-regex "[A-Za-z\\$\\@\\?_][0-9A-Za-z_\\$\\@\\?\\!]*")
              (x-keywords '("if" "then" "else" "fn" "defn" "def" "true" "false"))
-             (x-builtins '("println" "print" "int?" "bool?" "string?" "list?" "array?"
-                            "hash?" "function?" "char?" "float?" "eof?" "length" "@" "set@"
+             (x-builtins '("println" "print" "exit" "int?" "bool?" "string?" "list?" "array?"
+                            "hash?" "function?" "char?" "float?" "eof?" "file?" "length" "@" "set@"
                             "substring" "subprefix" "push!" "pop!" "set@!" "insert!"
                             "remove!" "get" "has" "chr" "ord" "open!" "close!" "readchar!"
                             "writechar!" "car" "cdr"))

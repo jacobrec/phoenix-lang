@@ -119,6 +119,10 @@ let is_hash = function
   | Hash _ -> true
   | _ -> false
 
+let is_file = function
+  | File _ -> true
+  | _ -> false
+
 let is_EOF = function
   | EOF -> true
   | _ -> false

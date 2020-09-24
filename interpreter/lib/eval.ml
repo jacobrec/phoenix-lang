@@ -142,6 +142,10 @@ let rec env_with_builtins _ =
       should_init_base_env := false;
       ignore (List.map (fun (a, b) ->
                   Enviroment.add base_env a (Types.BuiltinFunc b)) Builtins.builtins);
+      Enviroment.add base_env "$stdin" (File (InFile stdin));
+      Enviroment.add base_env "$stdout" (File (OutFile stdout));
+      Enviroment.add base_env "$stderr" (File (OutFile stderr));
+
   end else ();
   base_env
   

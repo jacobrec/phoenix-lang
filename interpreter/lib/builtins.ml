@@ -292,6 +292,11 @@ let writechar file char =
   List []
                   
 
+let pexit v =
+  let code = Types.unwrap_int v in
+  let code = Int64.to_int code in
+  exit code
+
 let wrap1 fn = 
   let res_fn values = 
     assert ((List.length values) = 1);
@@ -325,6 +330,7 @@ let wrap1_bool fn =
 
 let builtins = [("println",   (wrap1 println));
                 ("print",     (wrap1 print));
+                ("exit",      (wrap1 pexit));
 
                 ("int?",      (wrap1_bool Types.is_int));
                 ("bool?",     (wrap1_bool Types.is_bool));
@@ -336,6 +342,7 @@ let builtins = [("println",   (wrap1 println));
                 ("char?",     (wrap1_bool Types.is_char));
                 ("float?",    (wrap1_bool Types.is_float));
                 ("eof?",      (wrap1_bool Types.is_EOF));
+                ("file?",     (wrap1_bool Types.is_file));
 
                 ("length",    (wrap1 length));
                 ("@",         (wrap2 at));

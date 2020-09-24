@@ -50,7 +50,7 @@
 ** Statement Types
    - ExprStmt :: =EXPR=
    - DefnStmt :: =defn NAME NAME* = EXPR=
-     
+
 ** Builtin Functions
    The goal is to have a minimal set of builtins on which anything can
    be built on top of. Mainly primatives for each type.
@@ -86,6 +86,13 @@
     - Concatenation :: =+=
 *** Bool
     - negation :: =!=
+
+** Special variables
+   These are variables used for specific purposes, and the
+   runtime may modify them at any time.
+   - =$stdin= :: contains a reference to standard input
+   - =$stdout= :: contains a reference to standard output
+   - =$stderr= :: contains a reference to standard error
 
 ** Example Code
    #+BEGIN_SRC

@@ -26,9 +26,9 @@ def keywords = {
   "false" => false
 };;
 
-defn reader_new filepath =
+defn reader_new file =
   def linenum = 1;
-  def src  = open!(filepath, "r");
+  def src  = if file?(file) then file else if string?(file) then open!(file, "r") else exit(-1);
   def cur  = readchar!(src);
   def next = readchar!(src);
   {"src" => src, "line" => linenum, "cur" => cur, "next" => next}
@@ -139,5 +139,5 @@ defn reader_next_token reader =
 
 
 def reader = reader_new("main.phx");;
-
-dotimes(fn = println(reader_next_token(reader)), 10);;
+# def reader = reader_new($stdin);;
+dotimes(fn = println(reader_next_token(reader)), 100);;
