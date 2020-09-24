@@ -24,6 +24,7 @@ rule token = parse
 | newline { next_line lexbuf; token lexbuf }
 | ['0'-'9']+ as i { INT (Int64.of_string i) }
 | '"'  { STR (string (Buffer.create 100) lexbuf) } (* see below *)
+| '\'' { CHAR (char_lit (Buffer.create 1) lexbuf) } (* see below *)
 | '#'  { waste_comment lexbuf } (* Comment, read til EOL *)
 | '+'  { PLUS }
 | '-'  { MINUS }
@@ -66,6 +67,24 @@ rule token = parse
 | eof { EOF }
 | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
 
+and char_lit buf = parse (* use buf to build up result *)
+| [^'\'' '\n' '\\']+  
+            { Buffer.add_string buf @@ Lexing.lexeme lexbuf;
+              char_lit buf lexbuf}
+| '\n'      { Buffer.add_string buf @@ Lexing.lexeme lexbuf;
+              Lexing.new_line lexbuf;
+              char_lit buf lexbuf }
+| '\\' '\''  { Buffer.add_char buf '\"'; char_lit buf lexbuf }
+| '\\' 'n'   { Buffer.add_char buf '\n'; char_lit buf lexbuf }
+| '\\' 't'   { Buffer.add_char buf '\t'; char_lit buf lexbuf }
+| '\\'       { Buffer.add_char buf '\\'; char_lit buf lexbuf }
+
+| '\''       { let s = Buffer.contents buf in 
+                if 1 = String.length s then s 
+                else raise (SyntaxError ("Multiple chars in char literal: " 
+                                          ^ Lexing.lexeme lexbuf)) } (* return *)
+| eof       { raise (SyntaxError ("Encountered EOF while in char literal: " ^ Lexing.lexeme lexbuf)) }
+| _         { raise (SyntaxError ("Unexpected char inside char literal: " ^ Lexing.lexeme lexbuf)) }
 and string buf = parse (* use buf to build up result *)
 | [^'"' '\n' '\\']+  
             { Buffer.add_string buf @@ Lexing.lexeme lexbuf;

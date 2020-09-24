@@ -32,6 +32,7 @@ type literal =
   | LitArray      of expr list
   | LitList       of expr list
   | LitHash       of (expr * expr) list
+  | LitChar       of char
 
 and expr =
   | UniExpr      of uniop * expr
@@ -97,7 +98,8 @@ let rec string_of_expr expr =
   and string_of_literal lit =
     match lit with
     | LitInt i -> Int64.to_string i
-    | LitString s -> "\"" ^ s ^ "\"" (* TODO: escape string properly *)
+    | LitString s -> "\"" ^ (String.escaped s) ^ "\""
+    | LitChar s -> "'" ^ (String.make 1 s) ^ "'"
     | LitIdentifier s -> string_of_identifier s
     | LitBool b -> if b then "true" else "false"
     | LitArray b -> "[|" ^ (string_of_expression_list b) ^ "|]"
@@ -128,7 +130,9 @@ let rec walk
                    ~walk_uni ~walk_bin ~walk_if ~walk_def ~walk_fn ~walk_call in
   match exp with
   | UniExpr (op, e) -> if walk_uni then uni op (mwalk e) else uni op e
-  | BinExpr (op, e1, e2) -> if walk_bin then bin op (mwalk e1) (mwalk e2) else bin op e1 e2
+  | BinExpr (op, e1, e2) -> if walk_bin then let w1 = (mwalk e1) in
+                                             let w2 = (mwalk e2) in
+                                             bin op w1 w2 else bin op e1 e2
   | ShortBinExpr (op, e1, e2) -> if walk_bin then sbin op (mwalk e1) (mwalk e2) else sbin op e1 e2
   | IfExpr  (e1, e2, e3) -> if walk_if then eif (mwalk e1) (mwalk e2) (mwalk e3) else eif e1 e2 e3
   | DefExpr (n, e) -> if walk_def then def n (mwalk e) else def n e

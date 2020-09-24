@@ -11,7 +11,9 @@ let get_free_vars bound expression =
                          else free := i :: !free;
                          LitExpr (LitIdentifier i)
     | i -> LitExpr i in
-  let def name expr = bound := name :: !bound; DefExpr (name, expr) in
+  let def name expr =
+    bound := name :: !bound;
+    DefExpr (name, expr) in
   ignore (walk ~lit ~def ~walk_fn:false expression);
   !free
 
@@ -62,6 +64,7 @@ and eval_lit env = function
   | LitIdentifier v -> Enviroment.get env v
   | LitInt v -> Int48 v
   | LitString v -> String v
+  | LitChar v -> Char v
   | LitList v ->
      List (List.map (fun i -> eval env i) v)
   | LitArray v ->
@@ -105,15 +108,22 @@ and eval_call env name args =
      fn (List.map evals args)
   | _ -> raise (EvalErr "cannot call non callable object")
 
-and eval env = function
-  | ShortBinExpr (op, e1, e2) -> eval_short_binop env op e1 e2
-  | BinExpr (op, e1, e2) -> eval_binop env op e1 e2
-  | UniExpr (op, e) -> eval_uniop env op e
-  | LitExpr l -> eval_lit env l
-  | IfExpr (e1, e2, e3) -> eval_if env e1 e2 e3
-  | FnExpr (args, e) -> eval_fn env args e
-  | DefExpr (name, e) -> eval_def env name e
-  | CallExpr (name, args) -> eval_call env name args
+and eval env expr =
+  try
+    match expr with
+    | ShortBinExpr (op, e1, e2) -> eval_short_binop env op e1 e2
+    | BinExpr (op, e1, e2) -> eval_binop env op e1 e2
+    | UniExpr (op, e) -> eval_uniop env op e
+    | LitExpr l -> eval_lit env l
+    | IfExpr (e1, e2, e3) -> eval_if env e1 e2 e3
+    | FnExpr (args, e) -> eval_fn env args e
+    | DefExpr (name, e) -> eval_def env name e
+    | CallExpr (name, args) -> eval_call env name args
+  with Enviroment.EnvLookup s ->
+        print_endline "### Error in expression ###";
+        print_endline (string_of_expr expr);
+        raise (Enviroment.EnvLookup s)
+  
 
 
 let eval_stmt ?(loud=false) env stmt = 

@@ -1,5 +1,6 @@
 %token <int64> INT
 %token <string> STR
+%token <string> CHAR
 %token <string> ID
 %token PLUS MINUS TIMES DIV MOD
 %token LPAREN RPAREN LBRACK RBRACK LBRACK_PIPE RBRACK_PIPE LBRACE RBRACE
@@ -18,7 +19,7 @@
 
 %token EOF
 /* Low Precedence */
-%left  SEMICOLON COLON
+%right  SEMICOLON COLON
 %right EQUAL
 %right COLON_EQUAL
 %right ELSE
@@ -88,6 +89,7 @@ hashpair:
 literal:
   | e = INT   { LitInt e }
   | e = STR   { LitString e }
+  | e = CHAR  { LitChar (String.get e 0) }
   | TRUE  { LitBool true }
   | FALSE { LitBool false }
   | i = identifier { LitIdentifier i }

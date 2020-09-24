@@ -83,6 +83,7 @@ let less v1 v2 =
     | (Int48 v1, Float v2) -> fcmp (Int64.to_float v1) v2
     | (Float v1, Float v2) -> fcmp v1 v2
     | (String v1, String v2) -> -1 = String.compare v1 v2
+    | (Char v1, Char v2) -> -1 = Char.compare v1 v2
     | (_, _) -> raise (TypeErr "Cannot check less then of these types") in
   Bool b
 
@@ -96,6 +97,7 @@ let greater v1 v2 =
     | (Int48 v1, Float v2) -> fcmp (Int64.to_float v1) v2
     | (Float v1, Float v2) -> fcmp v1 v2
     | (String v1, String v2) -> 1 = String.compare v1 v2
+    | (Char v1, Char v2) -> 1 = Char.compare v1 v2
     | (_, _) -> raise (TypeErr "Cannot check greater then of these types") in
   Bool b
 
@@ -110,6 +112,7 @@ let less_equal v1 v2 =
     | (Int48 v1, Float v2) -> fcmp (Int64.to_float v1) v2
     | (Float v1, Float v2) -> fcmp v1 v2
     | (String v1, String v2) -> 1 <> String.compare v1 v2
+    | (Char v1, Char v2) -> 1 <> Char.compare v1 v2
     | (_, _) -> raise (TypeErr "Cannot check less or equal of these types") in
   Bool b
 
@@ -124,6 +127,7 @@ let greater_equal v1 v2 =
     | (Int48 v1, Float v2) -> fcmp (Int64.to_float v1) v2
     | (Float v1, Float v2) -> fcmp v1 v2
     | (String v1, String v2) -> -1 <> String.compare v1 v2
+    | (Char v1, Char v2) -> -1 <> Char.compare v1 v2
     | (_, _) -> raise (TypeErr "Cannot check greater or equal of these types") in
   Bool b
 
