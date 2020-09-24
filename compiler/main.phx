@@ -132,8 +132,6 @@ defn reader_next_token reader =
   else if c == '"' then reader_next_string(reader)
   else if c == '\'' then reader_next_char(reader)
   else if has(simple_symbols, c) then reader_next_symbol(reader, simple_symbols)
-  else if c == '[' then reader_next_token(reader) # TODO: Array and List literals
-  else if c == '{' then reader_next_token(reader) # TODO: Hash literals
   else if identifier_start_char(c) then reader_identifier_or_keyword(reader)
   else if char_number?(c) then reader_next_number(reader)
   else reader_create_token(reader, "error", "unknown token")
@@ -142,4 +140,4 @@ defn reader_next_token reader =
 
 def reader = reader_new("main.phx");;
 
-dotimes(fn = println(reader_next_token(reader)), 500);;
+dotimes(fn = println(reader_next_token(reader)), 10);;
