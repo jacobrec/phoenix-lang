@@ -1,6 +1,11 @@
 ###### Core Library
 # This is compiled in with every code
 
+#### Char functions
+defn char_number? c =
+  char?(c) && ('0' <= c && c <= '9') # 48->0 57->9
+;;
+
 #### List functions
 defn map f l =
   if l then (f(car(l)) :: map(f, cdr(l))) else l

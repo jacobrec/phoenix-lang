@@ -1,0 +1,77 @@
+###### Phoenix Compiler ######
+println("Compiler start");;
+
+#### Reader
+def simple_symbols = {
+  '+' => "+",
+  '=' => {'=' => "==", '>' => "=>", true => "+"},
+  ';' => {';' => ";;", true => ";"}
+};;
+
+def keywords = {
+  "if" => true,
+  "then" => "then",
+  "else" => "else",
+  "def" => "def",
+  "defn" => "defn",
+  "fn" => "fn",
+  "true" => true,
+  "false" => false
+};;
+
+defn reader_new filepath =
+  def linenum = 0;
+  def src  = open!(filepath, "r");
+  def cur  = readchar!(src);
+  def next = readchar!(src);
+  {"src" => src, "line" => linenum, "cur" => cur, "next" => next}
+;;
+
+defn reader_next reader =
+  insert!(reader, "cur", get(reader, "next"));
+  insert!(reader, "next", readchar!(get(reader, "src")));;
+  
+
+defn reader_inc_lines reader =
+  insert!(reader, "line", get(reader, "line") + 1);;
+
+defn reader_create_token reader name val =
+  { "tok"=>name, "val"=>val, "line"=>get(reader, "line") }
+;;
+  
+defn reader_next_number reader =
+  (defn get_num =
+    def n = ord(get(reader, "cur")) - ord('0');
+    reader_next(reader);
+    if char_number?(get(reader, "cur")) then n * 10 + get_num()
+    else n);
+  reader_create_token(reader, "int", get_num())
+;;
+
+defn reader_next_symbol reader map =
+  def c = get(reader, "cur");
+  if has(map, c) then
+    def v = get(map, c);
+    if string?(v) then reader_create_token(reader, "op", v)
+    else (reader_next(reader); reader_next_symbol(reader, v))
+  else reader_create_token(reader, "op", get(map, true))
+  : reader_next(reader)
+;;
+  
+
+defn reader_next_token reader =
+  def c = get(reader, "cur");
+  if c == ' ' then reader_next(reader); reader_next_token(reader)
+  else if c == '\n' then reader_inc_lines(reader); reader_next(reader); reader_next_token(reader)
+  else if has(simple_symbols, c) then reader_next_symbol(reader, simple_symbols)
+  else if char_number?(c) then
+    reader_next_number(reader)
+  else { "tok"=>"error", "line"=>get(reader, "line") }
+;;
+
+
+def reader = reader_new("testin.phx");;
+println(reader_next_token(reader));;
+println(reader_next_token(reader));;
+println(reader_next_token(reader));;
+println(reader_next_token(reader));;
