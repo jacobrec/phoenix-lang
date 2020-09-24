@@ -74,17 +74,17 @@ and char_lit buf = parse (* use buf to build up result *)
 | '\n'      { Buffer.add_string buf @@ Lexing.lexeme lexbuf;
               Lexing.new_line lexbuf;
               char_lit buf lexbuf }
-| '\\' '\''  { Buffer.add_char buf '\"'; char_lit buf lexbuf }
+| '\\' '\''  { Buffer.add_char buf '\''; char_lit buf lexbuf }
 | '\\' 'n'   { Buffer.add_char buf '\n'; char_lit buf lexbuf }
 | '\\' 't'   { Buffer.add_char buf '\t'; char_lit buf lexbuf }
-| '\\'       { Buffer.add_char buf '\\'; char_lit buf lexbuf }
+| '\\' '\\'  { Buffer.add_char buf '\\'; char_lit buf lexbuf }
 
 | '\''       { let s = Buffer.contents buf in 
                 if 1 = String.length s then s 
-                else raise (SyntaxError ("Multiple chars in char literal: " 
-                                          ^ Lexing.lexeme lexbuf)) } (* return *)
+                else raise (SyntaxError ("Multiple chars in char literal: [" ^ s ^ "]")) } 
 | eof       { raise (SyntaxError ("Encountered EOF while in char literal: " ^ Lexing.lexeme lexbuf)) }
 | _         { raise (SyntaxError ("Unexpected char inside char literal: " ^ Lexing.lexeme lexbuf)) }
+
 and string buf = parse (* use buf to build up result *)
 | [^'"' '\n' '\\']+  
             { Buffer.add_string buf @@ Lexing.lexeme lexbuf;
@@ -95,7 +95,7 @@ and string buf = parse (* use buf to build up result *)
 | '\\' '"'  { Buffer.add_char buf '"'; string buf lexbuf }
 | '\\' 'n'  { Buffer.add_char buf '\n'; string buf lexbuf }
 | '\\' 't'  { Buffer.add_char buf '\t'; string buf lexbuf }
-| '\\'      { Buffer.add_char buf '\\'; string buf lexbuf }
+| '\\' '\\' { Buffer.add_char buf '\\'; string buf lexbuf }
 
 | '"'       { Buffer.contents buf } (* return *)
 | eof       { raise (SyntaxError ("Encountered EOF while in string: " ^ Lexing.lexeme lexbuf)) }

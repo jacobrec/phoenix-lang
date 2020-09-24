@@ -3,9 +3,16 @@ println("Compiler start");;
 
 #### Reader
 def simple_symbols = {
-  '+' => "+",
-  '=' => {'=' => "==", '>' => "=>", true => "+"},
-  ';' => {';' => ";;", true => ";"}
+  '+' => "+", '*' => "*", '/' => "/",  '-' => "-", '%' => "%", '!' => "!",
+  '(' => "(", ')' => ")", '{' => "{", '}' => "}",
+  '[' => { true=>"[", '|'=>"[|"}, ']' => "]", '|' => {']' => "|]"},
+  '=' => {'=' => "==", '>' => "=>", true => "="},
+  '<' => {'=' => "<=", true => "<="},
+  '>' => {'=' => ">=", true => ">="},
+  '&' => {'&' => "&&"}, '|' => {'|' => "||"},
+  ';' => {';' => ";;", true => ";"},
+  ':' => {':' => "::", '='=>":=", true => ":"},
+  ',' => ","
 };;
 
 def keywords = {
@@ -20,7 +27,7 @@ def keywords = {
 };;
 
 defn reader_new filepath =
-  def linenum = 0;
+  def linenum = 1;
   def src  = open!(filepath, "r");
   def cur  = readchar!(src);
   def next = readchar!(src);
@@ -38,6 +45,13 @@ defn reader_inc_lines reader =
 defn reader_create_token reader name val =
   { "tok"=>name, "val"=>val, "line"=>get(reader, "line") }
 ;;
+
+defn reader_waste_comment reader =
+  def c = get(reader, "cur");
+  if c == '\n' then []
+  else (reader_next(reader); reader_waste_comment(reader))
+;;
+  
   
 defn reader_next_number reader =
   (defn get_num =
@@ -52,26 +66,80 @@ defn reader_next_symbol reader map =
   def c = get(reader, "cur");
   if has(map, c) then
     def v = get(map, c);
-    if string?(v) then reader_create_token(reader, "op", v)
+    if string?(v) then (reader_create_token(reader, "op", v) : reader_next(reader))
     else (reader_next(reader); reader_next_symbol(reader, v))
-  else reader_create_token(reader, "op", get(map, true))
-  : reader_next(reader)
+  else if has(map, true) then reader_create_token(reader, "op", get(map, true))
+  else reader_create_token(reader, "error", "invalid symbol sequence")
+;;
+
+defn identifier_start_char c =
+  between('a', c, 'z') ||
+  between('A', c, 'Z') ||
+  c == '@' ||
+  c == '?' ||
+  c == '$' ||
+  c == '_'
+;;
+
+defn identifier_char c =
+  identifier_start_char(c) ||
+  between('0', c, '9') ||
+  c == '!'
+;;
+  
+defn reader_identifier_or_keyword reader =
+  (defn read_ident = 
+    def c = get(reader, "cur");
+    if identifier_char(c) then reader_next(reader); c + read_ident()
+    else "");
+  def id = read_ident();
+  if has(keywords, id) then reader_create_token(reader, "keyword", get(keywords, id))
+  else reader_create_token(reader, "identifier", id)
+;;
+
+defn reader_string reader escaped end =
+    reader_next(reader);
+    def c = get(reader, "cur");
+    if escaped then
+      if c == 'n' then "\n" + reader_string(reader, false, end)
+      else if c == '\\' then "\\" + reader_string(reader, false, end)
+      else if c == 't' then "\t" + reader_string(reader, false, end)
+      else c + reader_string(reader, false, end)
+    else if c == end then ""
+    else if c == '\\' then reader_string(reader, true, end)
+    else c + reader_string(reader, false, end)
+;;
+defn reader_next_string reader =
+  reader_create_token(reader, "string", reader_string(reader, false, '"')):
+  reader_next(reader)
+;;
+
+defn reader_next_char reader =
+  def str = reader_string(reader, false, '\'');
+  if length(str) == 1 then (
+    reader_create_token(reader, "char", str):
+    reader_next(reader)
+  ) else reader_create_token(reader, "error", "too many chars in char literal")
 ;;
   
 
 defn reader_next_token reader =
   def c = get(reader, "cur");
-  if c == ' ' then reader_next(reader); reader_next_token(reader)
+  if eof?(c) then reader_create_token(reader, "error", "eof")
+  else if c == ' ' then reader_next(reader); reader_next_token(reader)
   else if c == '\n' then reader_inc_lines(reader); reader_next(reader); reader_next_token(reader)
+  else if c == '#' then reader_waste_comment(reader); reader_next_token(reader)
+  else if c == '"' then reader_next_string(reader)
+  else if c == '\'' then reader_next_char(reader)
   else if has(simple_symbols, c) then reader_next_symbol(reader, simple_symbols)
-  else if char_number?(c) then
-    reader_next_number(reader)
-  else { "tok"=>"error", "line"=>get(reader, "line") }
+  else if c == '[' then reader_next_token(reader) # TODO: Array and List literals
+  else if c == '{' then reader_next_token(reader) # TODO: Hash literals
+  else if identifier_start_char(c) then reader_identifier_or_keyword(reader)
+  else if char_number?(c) then reader_next_number(reader)
+  else reader_create_token(reader, "error", "unknown token")
 ;;
 
 
-def reader = reader_new("testin.phx");;
-println(reader_next_token(reader));;
-println(reader_next_token(reader));;
-println(reader_next_token(reader));;
-println(reader_next_token(reader));;
+def reader = reader_new("main.phx");;
+
+dotimes(fn = println(reader_next_token(reader)), 500);;

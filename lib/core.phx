@@ -1,6 +1,16 @@
 ###### Core Library
 # This is compiled in with every code
 
+#### Utilities
+# between is inclusive
+defn between a b c = a <= b && b <= c ;;
+defn betweenx a b c = a < b && b < c ;;
+
+#### Looping constructs
+defn dotimes f n =
+  if n <= 0 then [] else (f(); dotimes(f, n - 1))
+;;
+
 #### Char functions
 defn char_number? c =
   char?(c) && ('0' <= c && c <= '9') # 48->0 57->9

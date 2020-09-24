@@ -10,6 +10,8 @@ let rec equal v1 v2 =
         | (String v1, String v2) -> String.equal v1 v2
         | (Bool v1, Bool v2) -> Bool.equal v1 v2
         | (Char v1, Char v2) -> Char.equal v1 v2
+        | (String v1, Char v2) -> String.equal v1 (String.make 1 v2)
+        | (Char v1, String v2) -> String.equal (String.make 1 v1) v2
         | (List v1, List v2) -> list_equal v1 v2
         | (Array v1, Array v2) -> array_equal !v1 !v2
         | (_, _) -> false)
@@ -32,6 +34,8 @@ let add v1 v2 =
   | (Int48 v1, Float v2) -> Float ((Int64.to_float v1) +. v2)
   | (Float v1, Float v2) -> Float (v1 +. v2)
   | (String v1, String v2) -> String (v1 ^ v2)
+  | (Char v1, String v2) -> String ((String.make 1 v1) ^ v2)
+  | (String v1, Char v2) -> String (v1 ^ (String.make 1 v2))
   | (List v1, List v2) -> List (List.append v1 v2)
   | (Array v1, Array v2) -> Array (ref (Array.append !v1 !v2))
   | (_, _) -> raise (TypeErr "Cannot add these types")
