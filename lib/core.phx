@@ -6,6 +6,12 @@
 defn between a b c = a <= b && b <= c ;;
 defn betweenx a b c = a < b && b < c ;;
 
+# Easier printing
+defn printl list =
+  if length(list) == 0 then println("")
+  else (print(car(list)); printl(cdr(list)))
+;;
+
 #### Looping constructs
 defn dotimes f n =
   if n <= 0 then [] else (f(); dotimes(f, n - 1))
@@ -23,4 +29,20 @@ defn map f l =
 
 defn foreach f l =
   if l then (f(car(l)); foreach(f, cdr(l)); [||]) else l
+;;
+
+
+defn reverse l =
+  (defn accer acc l =
+    if l then accer(car(l) :: acc, cdr(l))
+    else acc);
+  accer([], l)
+;;
+
+defn array_of_list_rev l =
+  if l then push!(array_of_list_rev(cdr(l)), car(l)) else [||]
+;;
+
+defn array_of_list l =
+  array_of_list_rev(reverse(l))
 ;;
