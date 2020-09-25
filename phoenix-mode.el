@@ -12,7 +12,8 @@
                             "substring" "subprefix" "push!" "pop!" "set@!" "insert!"
                             "remove!" "get" "has" "chr" "ord" "open!" "close!" "readchar!"
                             "writechar!" "car" "cdr"))
-             (x-symbols '("+" "-" "*" "/" "&&" "||" ";" ";;" ":" "==" "<" "<=" ">" ">=" "=" "=>"))
+             (x-symbols '("+" "-" "*" "/" "&&" "||" ";" ";;" ":" "==" "<" "<=" ">" ">=" "=" "=>"
+                          "[|" "|]" "[" "]" "{" "}"))
              (x-keyword-regex (regexp-opt x-keywords 'words))
              (x-builtin-regex (regexp-opt x-builtins 'symbols))
              (x-symbols-regex (regexp-opt x-symbols))
