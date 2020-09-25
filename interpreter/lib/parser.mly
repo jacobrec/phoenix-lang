@@ -19,18 +19,18 @@
 
 %token EOF
 /* Low Precedence */
-%right  SEMICOLON COLON
+%right SEMICOLON COLON
 %right EQUAL
 %right COLON_EQUAL
 %right ELSE
-%left OR_OR
-%left AND_AND
-%left EQUAL_EQUAL LESS_EQUAL GREATER_EQUAL
-%left LESS GREATER
+%left  OR_OR
+%left  AND_AND
+%left  EQUAL_EQUAL LESS_EQUAL GREATER_EQUAL
+%left  LESS GREATER
 %right COLON_COLON
-%left PLUS MINUS
-%left TIMES DIV MOD
-%left BANG
+%left  PLUS MINUS
+%left  TIMES DIV MOD
+%left  BANG
 /* High Precedence */
 
 %start <stmt list> main

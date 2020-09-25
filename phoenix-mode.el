@@ -29,6 +29,8 @@
   (modify-syntax-entry ?' "\"")
   (modify-syntax-entry ?# "< b")
   (modify-syntax-entry ?\n "> b")
+  (modify-syntax-entry ?< "(>")
+  (modify-syntax-entry ?> ")<")
   (let ((syms '(?$ ?@ ?! ?_ ??)))
     (dolist (x syms)
       (modify-syntax-entry x "_"))))

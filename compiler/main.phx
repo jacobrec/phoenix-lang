@@ -16,7 +16,7 @@ def simple_symbols = {
 };;
 
 def keywords = {
-  "if" => true,
+  "if" => "if",
   "then" => "then",
   "else" => "else",
   "def" => "def",
@@ -27,23 +27,23 @@ def keywords = {
 };;
 
 defn reader_new file =
-  def linenum = 1;
   def src  = if file?(file) then file else if string?(file) then open!(file, "r") else exit(-1);
-  def cur  = readchar!(src);
-  def next = readchar!(src);
-  {"src" => src, "line" => linenum, "cur" => cur, "next" => next}
+  {"src" => src, "column" => 0, "line" => 1, "cur" => readchar!(src)}
 ;;
 
 defn reader_next reader =
-  insert!(reader, "cur", get(reader, "next"));
-  insert!(reader, "next", readchar!(get(reader, "src")));;
+  insert!(reader, "column", get(reader, "column") + 1);
+  insert!(reader, "cur", readchar!(get(reader, "src")))
+;;
   
 
 defn reader_inc_lines reader =
-  insert!(reader, "line", get(reader, "line") + 1);;
+  insert!(reader, "line", get(reader, "line") + 1);
+  insert!(reader, "column", 0)
+;;
 
 defn reader_create_token reader name val =
-  { "tok"=>name, "val"=>val, "line"=>get(reader, "line") }
+  { "tok"=>name, "val"=>val, "col" =>get(reader, "column"), "line"=>get(reader, "line") }
 ;;
 
 defn reader_waste_comment reader =
@@ -137,7 +137,170 @@ defn reader_next_token reader =
   else reader_create_token(reader, "error", "unknown token")
 ;;
 
+#### Parser
+defn parser_new reader =
+  { "reader"=>reader, "cur" => reader_next_token(reader), "next" => reader_next_token(reader) }
+;;
 
-def reader = reader_new("main.phx");;
-# def reader = reader_new($stdin);;
-dotimes(fn = println(reader_next_token(reader)), 100);;
+defn parser_next parser =
+  insert!(parser, "cur", get(parser, "next"));
+  insert!(parser, "next", reader_next_token(get(parser, "reader")))
+;;
+
+defn parser_cur parser =
+  get(parser, "cur")
+;;
+
+defn printloc parser =
+  def t = parser_cur(parser);
+  def line = get(t, "line");
+  def col = get(t, "col");
+  print("loc:");
+  print(line);
+  print(":");
+  print(col);
+  print(" ")
+;;
+
+defn parser_expect parser tok val =
+  def c = get(parser, "cur");
+  (defn error =
+    printloc(parser);
+    print("Expected [");
+    print(val);
+    print("] but got [");
+    print(get(c, "val"));
+    println("]")
+  );
+  if get(c, "tok") == tok && get(c, "val") == val then parser_next(parser)
+  else (error(); exit(1))
+;;
+
+
+defn create_binexpr op left right = [|"binary", op, left, right|];;
+defn create_uniexpr op expr = [|"unary", op, expr|];;
+defn create_ifexpr cond ethen eelse = [|"if", cond, ethen, eelse|];;
+defn create_defexpr name expr = [|"def", name, expr|];;
+defn create_fnexpr args expr = [|"fn", args, expr|];;
+defn create_defnexpr name args expr = create_defexpr(name, create_fnexpr(args, expr));;
+defn create_callexpr name args = [|"call", name, args|];;
+defn create_litexpr val = remove!(val, "tok"); [|"lit", val|];;
+
+def precedence = {
+  "!"  => 110,
+  "*"  => 100,
+  "/"  => 100,
+  "%"  => 100,
+  "-"  => 90,
+  "+"  => 90,
+  "::" => 80,
+  "<"  => 70,
+  ">"  => 70,
+  "==" => 60,
+  "<=" => 60,
+  ">=" => 60,
+  "&&" => 50,
+  "||" => 40,
+  ":=" => 30,
+  "="  => 20,
+  ";"  => 10,
+  ":"  => 10
+};;
+
+defn parse_atom parser =
+  def c = parser_cur(parser);
+  parser_next(parser);
+  if get(c, "tok") == "int" then create_litexpr(c)
+  else if get(c, "tok") == "string" then create_litexpr(c)
+  else if get(c, "tok") == "keyword" then create_litexpr(c)
+  else (print("Unexpected atom: "); println(get(c, "val")); exit(-1))
+;;
+
+
+defn parse_unary parser =
+  def c = parser_cur(parser);
+  if get(c, "tok") == "op" then
+    parser_next(parser);
+    if get(c, "val")      == "-" then create_uniexpr(get(c, "val"), parse_unary(parser))
+    else if get(c, "val") == "!" then create_uniexpr(get(c, "val"), parse_unary(parser))
+    else (printloc(parser); print("bad unary operator:"); println(get(c, "val")); exit(1))
+  else
+    parse_atom(parser)
+;;
+
+defn parse_partial_binary parser prec left = 
+  def t = parser_cur(parser);
+  if get(t, "tok") == "op" && has(precedence, get(t, "val")) then (
+    def nprec = get(precedence, get(t, "val"));
+    if nprec > prec then (
+      parser_next(parser); # skip current operator
+      def right = parse_binary(parser, nprec);
+      create_binexpr(t, left, right)
+    ) else left
+  ) else
+    left
+;;
+
+defn parse_binary parser prec =
+  def left = parse_unary(parser);
+  (defn loop parser prec left =
+    def t = parser_cur(parser);
+    if get(t, "tok") == "op" &&
+       has(precedence, get(t, "val")) &&
+       get(precedence, get(t, "val")) > prec
+    then loop(parser, prec, parse_partial_binary(parser, prec, left))
+    else left);
+  loop(parser, prec, left)
+;;
+
+defn parse_if parser =
+  parser_expect(parser, "keyword", "if"); # skip if
+  def cond = parse_expr(parser);
+  parser_expect(parser, "keyword", "then"); # skip then
+  def ethen = parse_expr(parser);
+  parser_expect(parser, "keyword", "else"); # skip else
+  def eelse = parse_expr(parser);
+  create_ifexpr(cond, ethen, eelse)
+;;
+
+defn parse_def parser =
+  parser_expect(parser, "keyword", "def"); # skip def
+  def name = parser_cur(parser);
+  parser_next(parser); # skip name
+  parser_expect(parser, "op", "="); # skip =
+  def expr = parse_expr(parser);
+  create_defexpr(name, expr)
+;;
+
+defn parse_defn parser =
+  []
+;;
+
+defn parse_fn parser =
+  []
+;;
+
+defn parse_expr parser =
+  def c = parser_cur(parser);
+  if get(c, "tok") == "keyword" then 
+    if get(c, "val") == "defn" then parse_defn(parser)
+    else if get(c, "val") == "if" then parse_if(parser)
+    else if get(c, "val") == "fn" then parse_fn(parser)
+    else if get(c, "val") == "def" then parse_def(parser)
+    else parse_binary(parser, 0)
+  else parse_binary(parser, 0)
+;;
+  
+
+
+defn parse_stmt parser =
+  parse_expr(parser):
+  parser_expect(parser, "op", ";;")
+;;
+
+
+
+#dotimes(fn = println(reader_next_token(reader)), 7);;
+def reader = reader_new($stdin);;
+def parser = parser_new(reader);;
+println(parse_stmt(parser));;

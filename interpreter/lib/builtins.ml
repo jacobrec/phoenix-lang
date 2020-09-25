@@ -232,7 +232,8 @@ let remove h k =
 
 let get h k =
   let h = Types.unwrap_hash h in
-  Hashtbl.find h k
+  try Hashtbl.find h k
+  with Not_found -> failwith ("Key [" ^ (string_of_ptype k) ^ "] not in hashmap")
 
 let has h k =
   let h = Types.unwrap_hash h in
