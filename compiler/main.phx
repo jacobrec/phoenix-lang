@@ -208,40 +208,50 @@ def precedence = {
   ":"  => 10
 };;
 
-defn parse_comma_list parser itemparser =
-  def a = itemparser(parser);
-  if get(parser_cur(parser), "val") == "," then (
-    parser_expect(parser, "op", ",");
-    a :: parse_comma_list(parser, itemparser)
-  ) else []
+defn is_val parser type val =
+  get(parser_cur(parser), "val") == val &&
+    get(parser_cur(parser), "tok") == type
+;;
+
+defn parse_comma_list parser itemparser ending =
+  if is_val(parser, "op", ending) then [] else (
+    def a = itemparser(parser);
+    if is_val(parser, "op", ",") then (
+      parser_expect(parser, "op", ",");
+      a :: parse_comma_list(parser, itemparser, ending)
+    ) else [a])
 ;;
 
 # parse_(array|hash|list)_literal all assume the leading token has been consumed
 defn parse_array_literal parser =
-  def items = parse_comma_list(parser, fn p = parse_expr(p));
+  def items = parse_comma_list(parser, fn p = parse_expr(p), "|]");
   def t = parser_expect(parser, "op", "|]");
   create_litexpr(insert!(t, "val", array_of_list(items)))
 ;;
 defn parse_list_literal parser =
-  def items = parse_comma_list(parser, fn p = parse_expr(p));
+  def items = parse_comma_list(parser, fn p = parse_expr(p), "]");
   def t = parser_expect(parser, "op", "]");
   create_litexpr(insert!(t, "val", items))
 ;;
+
+defn parse_hash_literal_pair parser = 
+  def key = parse_expr(parser);
+  parser_expect(parser, "op", "=>");
+  def value = parse_expr(parser);
+  [|"hashitem", key, value|]
+;;
 defn parse_hash_literal parser =
-  #TODO: parse hashmap literals
-  1
+  def items = parse_comma_list(parser, fn p = parse_hash_literal_pair(p), "}");
+  def t = parser_expect(parser, "op", "}");
+  create_litexpr(insert!(t, "val", {"data"=>items}))
 ;;
 
 defn parse_call_args parser =
-  parse_comma_list(parser, fn parser =
-                             parser_cur(parser):
-                             parser_next(parser))
+  parse_comma_list(parser, fn p = parse_expr(p), ")")
 ;;
 defn parse_call parser name =
   parser_expect(parser, "op", "(");
-  def args =
-    if get(parser_cur(parser), "val") == ")" then []
-    else parse_call_args(parser);
+  def args = parse_call_args(parser);
   parser_expect(parser, "op", ")");
   create_callexpr(name, args)
 ;;
@@ -259,6 +269,7 @@ defn parse_atom parser =
   parser_next(parser);
   if get(c, "tok") == "int" then create_litexpr(c)
   else if get(c, "tok") == "string" then create_litexpr(c)
+  else if get(c, "tok") == "char" then create_litexpr(c)
   else if get(c, "tok") == "keyword" then create_litexpr(c)
   else if get(c, "tok") == "identifier" then parse_identifier_or_call(parser, c)
   else if get(c, "tok") == "op" then 
@@ -372,13 +383,21 @@ defn parse_expr parser =
 
 
 defn parse_stmt parser =
-  parse_expr(parser):
+  println(parse_expr(parser)):
   parser_expect(parser, "op", ";;")
 ;;
 
+defn parse_stmts parser = 
+  if get(parser_cur(parser), "val") == "eof" then []
+  else (
+    def a = parse_stmt(parser);
+    a :: parse_stmts(parser)
+  )
+;;
 
 
 #dotimes(fn = println(reader_next_token(reader)), 7);;
 def reader = reader_new($stdin);;
 def parser = parser_new(reader);;
-println(parse_stmt(parser));;
+
+println(parse_stmts(parser));;
