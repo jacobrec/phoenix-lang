@@ -306,7 +306,7 @@ defn parse_partial_binary parser prec left =
     def nprec = get(precedence, get(t, "val"));
     if nprec > prec then (
       parser_next(parser); # skip current operator
-      def right = parse_binary(parser, nprec);
+      def right = parse_expr_p(parser, nprec);
       create_binexpr(t, left, right)
     ) else left
   ) else
@@ -371,19 +371,26 @@ defn parse_fn parser =
 
 defn parse_expr parser =
   def c = parser_cur(parser);
-  if get(c, "tok") == "keyword" then 
-    if get(c, "val") == "defn" then parse_defn(parser)
-    else if get(c, "val") == "if" then parse_if(parser)
-    else if get(c, "val") == "fn" then parse_fn(parser)
-    else if get(c, "val") == "def" then parse_def(parser)
-    else parse_binary(parser, 0)
+  if is_val(parser, "keyword", "defn") then parse_defn(parser)
+  else if is_val(parser, "keyword", "if") then parse_if(parser)
+  else if is_val(parser, "keyword", "fn") then parse_fn(parser)
+  else if is_val(parser, "keyword", "def") then parse_def(parser)
   else parse_binary(parser, 0)
+;;
+
+defn parse_expr_p parser prec =
+  def c = parser_cur(parser);
+  if is_val(parser, "keyword", "defn") then parse_defn(parser)
+  else if is_val(parser, "keyword", "if") then parse_if(parser)
+  else if is_val(parser, "keyword", "fn") then parse_fn(parser)
+  else if is_val(parser, "keyword", "def") then parse_def(parser)
+  else parse_binary(parser, prec)
 ;;
   
 
 
 defn parse_stmt parser =
-  println(parse_expr(parser)):
+  parse_expr(parser):
   parser_expect(parser, "op", ";;")
 ;;
 
@@ -400,4 +407,6 @@ defn parse_stmts parser =
 def reader = reader_new($stdin);;
 def parser = parser_new(reader);;
 
-println(parse_stmts(parser));;
+def ast = parse_stmts(parser);;
+defn printlnln p = println(p) : println("");;
+map(printlnln, ast);;
