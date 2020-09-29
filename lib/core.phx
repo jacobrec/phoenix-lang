@@ -6,6 +6,12 @@
 defn between a b c = a <= b && b <= c ;;
 defn betweenx a b c = a < b && b < c ;;
 
+defn foreach f x =
+       if string?(x) then foreach_string(f, x)
+  else if list?(x)   then foreach_list(f, x)
+  else println("foreach not defined for this type")
+;;
+
 # Easier printing
 defn printl list =
   if length(list) == 0 then println("")
@@ -22,13 +28,32 @@ defn char_number? c =
   char?(c) && ('0' <= c && c <= '9') # 48->0 57->9
 ;;
 
+#### String functions
+defn map_string f s =
+  if length(s) > 0 then (
+    f(@(s, 0)) +  map_string(f, substring(s, 1))
+  ) else ""
+;;
+
+defn foreach_string f s =
+  if length(s) > 0 then (
+    f(@(s, 0));
+    foreach_string(f, substring(s, 1))
+  ) else []
+;;
+
+#### File functions
+defn write_string out str =
+  foreach(fn x = writechar!(out, x), str)
+;;
+
 #### List functions
 defn map f l =
   if l then (f(car(l)) :: map(f, cdr(l))) else l
 ;;
 
-defn foreach f l =
-  if l then (f(car(l)); foreach(f, cdr(l)); [||]) else l
+defn foreach_list f l =
+  if l then (f(car(l)); foreach_list(f, cdr(l)); []) else l
 ;;
 
 
@@ -46,3 +71,4 @@ defn array_of_list_rev l =
 defn array_of_list l =
   array_of_list_rev(reverse(l))
 ;;
+
