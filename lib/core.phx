@@ -43,7 +43,7 @@ defn foreach_string f s =
 ;;
 
 #### File functions
-defn write_string out str =
+defn write_string! out str =
   foreach(fn x = writechar!(out, x), str)
 ;;
 
@@ -53,7 +53,7 @@ defn map f l =
 ;;
 
 defn foreach_list f l =
-  if l then (f(car(l)); foreach_list(f, cdr(l)); []) else l
+  if l then (f(car(l)); foreach_list(f, cdr(l))) else l
 ;;
 
 

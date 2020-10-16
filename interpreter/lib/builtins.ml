@@ -34,6 +34,8 @@ let add v1 v2 =
   | (Int48 v1, Float v2) -> Float ((Int64.to_float v1) +. v2)
   | (Float v1, Float v2) -> Float (v1 +. v2)
   | (String v1, String v2) -> String (v1 ^ v2)
+  | (Int48 v1, String v2) -> String ((Int64.to_string v1) ^ v2)
+  | (String v1, Int48 v2) -> String (v1 ^ (Int64.to_string v2))
   | (Char v1, String v2) -> String ((String.make 1 v1) ^ v2)
   | (String v1, Char v2) -> String (v1 ^ (String.make 1 v2))
   | (List v1, List v2) -> List (List.append v1 v2)
@@ -134,6 +136,15 @@ let greater_equal v1 v2 =
     | (Char v1, Char v2) -> v1 >= v2
     | (_, _) -> raise (TypeErr "Cannot check greater or equal of these types") in
   Bool b
+
+(* shift(1, 3) = 8, shift(8, -1) = 4 *)
+let shift v1 v2 =
+  let i1 = Types.unwrap_int v1 in
+  let i2 = Int64.to_int (Types.unwrap_int v2) in
+
+  Int48 (if i2 >= 0
+         then Int64.shift_left i1 i2
+         else Int64.shift_right_logical i1 (-i2))
 
 (* For the :: operator *)
 let cons v1 v2 =
@@ -344,6 +355,8 @@ let builtins = [("println",   (wrap1 println));
                 ("float?",    (wrap1_bool Types.is_float));
                 ("eof?",      (wrap1_bool Types.is_EOF));
                 ("file?",     (wrap1_bool Types.is_file));
+
+                ("shift",     (wrap2 shift));
 
                 ("length",    (wrap1 length));
                 ("@",         (wrap2 at));

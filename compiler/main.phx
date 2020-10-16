@@ -117,7 +117,7 @@ defn reader_next_string reader =
 defn reader_next_char reader =
   def str = reader_string(reader, false, '\'');
   if length(str) == 1 then (
-    reader_create_token(reader, "char", str):
+    reader_create_token(reader, "char", @(str, 0)):
     reader_next(reader)
   ) else reader_create_token(reader, "error", "too many chars in char literal")
 ;;
@@ -293,8 +293,8 @@ defn parse_unary parser =
   !(get(c, "val") == "[|") &&
   !(get(c, "val") == "(") then
     parser_next(parser);
-    if get(c, "val")      == "-" then create_uniexpr(get(c, "val"), parse_unary(parser))
-    else if get(c, "val") == "!" then create_uniexpr(get(c, "val"), parse_unary(parser))
+    if get(c, "val")      == "-" then create_uniexpr(c, parse_unary(parser))
+    else if get(c, "val") == "!" then create_uniexpr(c, parse_unary(parser))
     else (printloc(parser); print("bad unary operator:"); println(get(c, "val")); exit(1))
   else
     parse_atom(parser)
@@ -387,8 +387,6 @@ defn parse_expr_p parser prec =
   else parse_binary(parser, prec)
 ;;
   
-
-
 defn parse_stmt parser =
   parse_expr(parser):
   parser_expect(parser, "op", ";;")
@@ -402,11 +400,124 @@ defn parse_stmts parser =
   )
 ;;
 
+#### ASM Generation
+def seperate = "\t";;
+def endline = "\n";;
+def labelchar = ":";;
+defn emit_line emitter line =
+  write_string!(get(emitter, "dest"), line + endline)
+;;
+
+defn emit0 emitter op =
+  emit_line(emitter, seperate + op)
+;;
+defn emit1 emitter op arg =
+  emit_line(emitter, seperate + op + seperate + arg)
+;;
+defn emit2 emitter op arg1 arg2 =
+  emit_line(emitter, seperate + op + seperate + arg1 +","+ seperate + arg2)
+;;
+
+defn emit_label emitter label =
+  emit_line(emitter, label + labelchar)
+;;
+
+defn emit_header emitter =
+  emit_line(emitter, "\t.text");
+  emit_line(emitter, "\t.p2align 4,,15");
+  emit_line(emitter, ".globl phoenix_start");
+  emit_line(emitter, "\t.type phoenix_start @function");
+  emit_label(emitter, "phoenix_start")
+;;
+  
+defn emitter_new loc =
+  {"dest"=>open!(loc, "w+"), "si"=>-4}
+;;
+
+defn stack_push out =
+  insert!(out, "si", get(out, "si") - 4);;
+defn stack_pop out =
+  insert!(out, "si", get(out, "si") + 4);;
+
+defn compile_program prog =
+  def out = emitter_new("tmp.s");
+  emit_header(out);
+  compile_stmts(out, prog);
+  emit0(out, "ret")
+;;
+
+defn compile_stmt out x =
+  compile(out, x)
+;;
+
+defn compile_stmts out x =
+  foreach(fn x = compile(out, x), x)
+;;
+
+defn literal_int int = 
+  "" + shift(int, 2)
+;;
+
+defn literal_char c = 
+  # tag is 0b00001111
+  "" + (shift(ord(c), 8) + 15)
+;;
+
+defn literal_bool b = 
+  # 7 bit tag (0011111)
+  if b then "63" else "31"
+;;
+
+defn compile_lit out tok =
+    def val = get(tok, "val");
+    def lval = (
+      if      int?(val)  then literal_int(val)
+      else if char?(val) then literal_char(val)
+      else if bool?(val) then literal_bool(val)
+      else (printl(["unknown literal token: ", tok]); exit(-1)));
+
+    emit2(out, "movl", "$"+lval, "%eax")
+;;
+  
+defn compile_unary out tok expr =
+  def op = get(tok, "val");
+  compile(out, expr);
+  if op == "-" then emit1(out, "negl", "%eax")
+  else (printl(["unknown unary type: ", op]); exit(-1))
+;;
+
+defn compile_binary out tok expr1 expr2 =
+  def op = get(tok, "val");
+  def si = get(out, "si");
+  stack_push(out);
+  compile(out, expr1);
+  emit2(out, "movl", "%eax", si + "(%esp)");
+  compile(out, expr2);
+  if      op == "+" then emit2(out, "addl", si + "(%esp)", "%eax")
+  else if op == "-" then emit2(out, "subl", si + "(%esp)", "%eax")
+  else (printl(["unknown binary type: ", op]); exit(-1));
+  stack_pop(out)
+;;
+
+
+defn compile out expr =
+  if @(expr, 0) == "lit"   then compile_lit(out, @(expr, 1))
+  else if @(expr, 0) == "unary" then compile_unary(out, @(expr, 1), @(expr, 2))
+  else if @(expr, 0) == "binary" then compile_binary(out, @(expr, 1), @(expr, 2), @(expr, 3))
+  else (printl(["unknown expression type: ", expr]); exit(-1))
+;;
+
+
 
 #dotimes(fn = println(reader_next_token(reader)), 7);;
-def reader = reader_new($stdin);;
+def reader = reader_new(open!("test.phx", "r"));;
 def parser = parser_new(reader);;
 
 def ast = parse_stmts(parser);;
+
+# print full ast
 defn printlnln p = println(p) : println("");;
-map(printlnln, ast);;
+#map(printlnln, ast);;
+println(ast);;
+
+compile_program(ast);;

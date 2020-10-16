@@ -11,7 +11,7 @@
                             "hash?" "function?" "char?" "float?" "eof?" "file?" "length" "@" "set@"
                             "substring" "subprefix" "push!" "pop!" "set@!" "insert!"
                             "remove!" "get" "has" "chr" "ord" "open!" "close!" "readchar!"
-                            "writechar!" "car" "cdr"))
+                            "writechar!" "car" "cdr" "shift"))
              (x-symbols '("+" "-" "*" "/" "&&" "||" ";" ";;" ":" "==" "<" "<=" ">" ">=" "=" "=>"
                           "[|" "|]" "[" "]" "{" "}"))
              (x-keyword-regex (regexp-opt x-keywords 'words))
